@@ -1,5 +1,6 @@
 apply plugin: 'scala'
 apply plugin: 'idea'
+apply plugin: 'application'
 
 repositories {
     mavenCentral()
@@ -14,3 +15,5 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
 }
+
+mainClassName = "Main"

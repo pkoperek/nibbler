@@ -8,21 +8,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 
-def splitToTimestampAndValue(input: String): (Long, Double) = {
-  val splittedStrings = input.split(",")
-  val timestampAsString = splittedStrings(0)
-
-  return (1L, splittedStrings(1).toDouble)
-}
-
-def evaluate(timestampValues: RDD[(Long, Double)]): Double = {
-  val evaluationService = new EvaluationService(timestampValues)
-
-  evaluationService.evaluate({
-    x => x * 2
-  })
-}
-
 object Main {
 
   val applicationName = "TestApp"
@@ -42,6 +27,20 @@ object Main {
     println("Evaluation result: " + evaluate(timestampValues))
   }
 
+  private def splitToTimestampAndValue(input: String): (Long, Double) = {
+    val splittedStrings = input.split(",")
+    val timestampAsString = splittedStrings(0)
+
+    return (1L, splittedStrings(1).toDouble)
+  }
+
+  private def evaluate(timestampValues: RDD[(Long, Double)]): Double = {
+    val evaluationService = new EvaluationService(timestampValues)
+
+    evaluationService.evaluate({
+      x => x * 2
+    })
+  }
 
   def validate(args: Array[String]) = {
     if (args.length != 2) {

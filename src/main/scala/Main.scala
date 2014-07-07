@@ -44,7 +44,7 @@ object Main {
 
   def validate(args: Array[String]) = {
     if (args.length != 2) {
-      println("Specify master URL as first parameter! Eg. mesos://149.156.10.32:1237")
+      println("Specify master URL and data files as parameters! Eg. mesos://149.156.10.32:1237 hdfs://master/data/data.csv")
       System.exit(1)
     }
   }

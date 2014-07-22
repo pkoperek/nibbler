@@ -26,6 +26,11 @@ sourceSets {
 repositories
 {
     mavenCentral()
+    
+    maven {
+        url "http://repo.spray.io/"    
+    }
+
 }
 
 dependencies {
@@ -36,6 +41,8 @@ dependencies {
     compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.3.0'
     compile group: 'org.scalatra', name: 'scalatra-scalate_2.10', version: '2.3.0'
 
+    // spray json
+    compile group: 'io.spray', name: 'spray-json_2.10', version: '1.2.6'
    
     // container used to run from gradle
     container group: 'org.eclipse.jetty', name: 'jetty-runner', version: '9.2.1.v20140609'

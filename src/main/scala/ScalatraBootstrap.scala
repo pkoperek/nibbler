@@ -3,7 +3,7 @@ import javax.servlet.ServletContext
 
 class ScalatraBootstrap extends LifeCycle {
     override def init(context: ServletContext) {
-        context.mount(new MyServlet(), "/*")
+        context.mount(new NibblerServlet(), "/*")
     }
 }
 

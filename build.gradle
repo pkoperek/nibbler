@@ -106,5 +106,13 @@ distZip {
     excludes = toExclude
 }
 
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+        scopes.PROVIDED.plus += [ configurations.provided ]
+    }
+}
+
 distZip.dependsOn prepareContainer
 jettyRun.dependsOn war

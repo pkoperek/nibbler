@@ -38,14 +38,10 @@ dependencies {
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'
 
     // spark 
-    providedCompile ('org.apache.spark:spark-core_2.10:1.0.0') {
-        // need to turn off transitive deps due to:
-        // http://forums.gradle.org/gradle/topics/war_plugin_not_including_certain_compile_dependencies_in_war
-        transitive = false
-    }
+    compile ('org.apache.spark:spark-core_2.10:1.0.0')
 
     // hadoop-client
-    providedCompile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.2.0'
+    compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.2.0'
 }
 
 // manually specify gradle version for gradlew

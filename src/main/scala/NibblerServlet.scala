@@ -16,7 +16,7 @@ class FunctionNode(val functionName: String, val operands: Seq[FunctionNode]) {
   val evaluationFunction = resolve(functionName)
 
   def evaluate(): Double = {
-
+    1.0
   }
 
   def resolve(functionName: String): (Double => Double) = {
@@ -52,7 +52,7 @@ class NibblerServlet extends ScalatraServlet {
 
       val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter( _ < 10 ).collect()
 
-      "Test query result: " + filteredValues + "\nParameters used: " + params
+      "Test query result: " + filteredValues.mkString(",") + "\nParameters used: " + params
     } else {
       "Master URL not specified!"
     }

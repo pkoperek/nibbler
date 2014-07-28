@@ -49,19 +49,38 @@ task wrapper(type: Wrapper) {
     distributionUrl = "http://services.gradle.org/distributions/gradle-2.0-bin.zip"
 }
 
-// runs jetty 
-task jettyRun(type: JavaExec) {
-    main = "org.eclipse.jetty.runner.Runner"
-    args = [war.archivePath]
-    classpath configurations.container
+war {
+    classpath = configurations.compile
 }
 
+// explode war - in fact just copies deps + web.xml
+task explodedWar(type: Copy) {
+    into "$buildDir/exploded"
+    with war
+}
+
+// add application's jar file to lib
+task addJarToExplodedWar(type: Copy) {
+    into "$buildDir/exploded/WEB-INF/lib"
+    from jar.archivePath
+}
+addJarToExplodedWar.dependsOn jar
+addJarToExplodedWar.dependsOn explodedWar
+
+// runs jetty
+task jettyRun(type: JavaExec) {
+    main = "org.eclipse.jetty.runner.Runner"
+    args = ["$buildDir/exploded"]
+    classpath configurations.container
+}
+jettyRun.dependsOn addJarToExplodedWar
+
 // include war file
-applicationDistribution.from(war) {
+applicationDistribution.from("$buildDir/exploded") {
     into("webapp")
 }
 
-applicationDistribution.from('build/container') {
+applicationDistribution.from("$buildDir/container") {
     into("lib")
 }
 
@@ -75,7 +94,7 @@ startScripts {
     classpath = configurations.container
 
     doLast {
-        unixScript.text = unixScript.text.replace("$mainClassName", "$mainClassName webapp/$war.archiveName")
+        unixScript.text = unixScript.text.replace("$mainClassName", "$mainClassName \$APP_HOME/webapp")
     }
 }
 
@@ -87,6 +106,8 @@ distZip {
     }
     excludes = toExclude
 }
+distZip.dependsOn prepareContainer
+distZip.dependsOn addJarToExplodedWar
 
 idea {
     module {
@@ -95,6 +116,3 @@ idea {
         scopes.PROVIDED.plus += [configurations.providedCompile]
     }
 }
-
-distZip.dependsOn prepareContainer
-jettyRun.dependsOn war

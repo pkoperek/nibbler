@@ -36,19 +36,13 @@ class FunctionNode(val functionName: String, val operands: Seq[FunctionNode]) {
   }
 }
 
-class NibblerServlet extends ScalatraServlet {
+class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 
   get("/status") {
     val masterUrl = params.get("masterUrl")
 
     if (masterUrl.isDefined) {
-
-      val conf = new SparkConf()
-        .setAppName("TestApp")
-        .set("spark.executor.uri", "http://d3kbcqa49mib13.cloudfront.net/spark-1.0.0-bin-hadoop2.tgz")
-        .setMaster(masterUrl.get)
-
-      val sparkContext = new SparkContext(conf)
+      val sparkContext = sparkContextService.createSparkContext("nibbler", masterUrl.get)
 
       val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter( _ < 10 ).collect()
 

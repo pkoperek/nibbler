@@ -4,7 +4,7 @@ nibbler
 
 service for processing large datasets with use of Scala/Apache Spark
 
-To run You need to set env variable:
+Test query for status:
 ```
-export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
+POST: http://149.156.10.32:9198/status?masterUrl=mesos%3A%2F%2Fzk%3A%2F%2Fmaster%3A2181%2Fmesos
 ```

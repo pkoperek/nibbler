@@ -10,21 +10,26 @@ import org.apache.spark.SparkConf
 
 object Main {
 
-  val applicationName = "TestApp"
-
   def main(args: Array[String]) {
 
     validate(args)
 
     val masterUrl = args(0)
     val inputFilePath = args(1)
-    val conf = new SparkConf().setAppName(applicationName).setMaster(masterUrl)
+    val conf = new SparkConf()
+      .setAppName("TestApp")
+      .set("spark.executor.uri", "http://d3kbcqa49mib13.cloudfront.net/spark-1.0.0-bin-hadoop2.tgz")
+      .setMaster(masterUrl)
+
     val sparkContext = new SparkContext(conf)
 
     val inputFile: RDD[String] = sparkContext.textFile(inputFilePath)
-    val timestampValues = inputFile.map(splitToTimestampAndValue)
+    println("Lines count: " + inputFile.count())
 
-    println("Evaluation result: " + evaluate(timestampValues))
+    //    val timestampValues = inputFile.map(splitToTimestampAndValue)
+    //
+    //    println("Evaluation result: " + evaluate(timestampValues))
+
   }
 
   private def splitToTimestampAndValue(input: String): (Long, Double) = {
@@ -49,3 +54,12 @@ object Main {
     }
   }
 }
+
+/*
+
+Launch on master the private ip is master's
+./spark-submit nibbler.jar --class Main mesos://172.16.67.196:5050 hdfs://172.16.67.196/data/test.csv
+export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
+export SPARK_EXECUTOR_URI=
+export MASTER=mesos://149.156.10.32:41047
+*/

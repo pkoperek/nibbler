@@ -98,6 +98,7 @@ startScripts {
 
     doLast {
         unixScript.text = unixScript.text.replace("$mainClassName", "$mainClassName \$APP_HOME/webapp")
+        unixScript.text = unixScript.text.replace("APP_NAME", "export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so\nAPP_NAME")
     }
 }
 

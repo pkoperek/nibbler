@@ -10,6 +10,7 @@ class SparkContextService(nibblerJarRealPath: String) {
                     .setAppName(appName)
                     .set("spark.executor.uri", executorUri)
                     .setMaster(masterUrl)
+                    .setSparkHome("someHomeWhichShouldBeIrrelevant")
 
         val ctx = new SparkContext(conf)        
         ctx.addJar(nibblerJarRealPath)

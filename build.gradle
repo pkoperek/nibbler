@@ -80,9 +80,12 @@ applicationDistribution.from("$buildDir/exploded") {
     into("webapp")
 }
 
+// include container
 applicationDistribution.from("$buildDir/container") {
     into("lib")
 }
+
+applicationDefaultJvmArgs = ["-Djava.net.preferIPv4Stack=true"]
 
 // prepare container 
 task prepareContainer(type: Copy) {

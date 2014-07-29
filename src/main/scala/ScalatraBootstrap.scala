@@ -3,10 +3,10 @@ import javax.servlet.ServletContext
 
 class ScalatraBootstrap extends LifeCycle {
 
-    override def init(servletContext: ServletContext) {
-        val nibblerJarRealPath = servletContext.getRealPath("/WEB-INF/lib/nibbler.jar")
+  override def init(servletContext: ServletContext) {
+    val nibblerJarRealPath = servletContext.getRealPath("/WEB-INF/lib/nibbler.jar")
 
-        servletContext.mount(new NibblerServlet(new SparkContextService(nibblerJarRealPath)), "/*")
-    }
+    servletContext.mount(new NibblerServlet(new SparkContextService(nibblerJarRealPath)), "/*")
+  }
 }
 

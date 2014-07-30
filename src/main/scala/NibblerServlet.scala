@@ -45,7 +45,12 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   }
 
   post("/evaluate") {
-    val expressionAsJson = request.body.parseJson.asJsObject
+    val requestAsJson = request.body.parseJson.asJsObject
+
+    val inputFile = requestAsJson.getFields("inputFile")(0).toString()
+    val input = sparkContext.textFile(inputFile)
+
+    "Counted: " + input.count()
 
     //    buildEvaluationFunction(expressionAsJson)
   }

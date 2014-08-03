@@ -2,7 +2,6 @@ import org.apache.spark.SparkContext
 
 import org.scalatra._
 import spray.json._
-import math._
 
 object Functions {
   def plus(inputValues: Seq[Double]): Double = {
@@ -38,7 +37,7 @@ object Functions {
   }
 }
 
-class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
+class FunctionNode(val function: Seq[Double] => Double, val children: Seq[FunctionNode]) {
 
   def evaluate(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = List[Double]()
@@ -46,8 +45,25 @@ class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
       childrenEvaluated :+ child.evaluate(inputRow)
     }
 
-    val function = resolveFunction(functionName)
     function(childrenEvaluated)
+  }
+
+}
+
+object FunctionNode {
+
+  def buildTree(inputAsJson: JsObject): FunctionNode = {
+    val children = extractChildren(inputAsJson)
+    val childrenAsNodes = List[FunctionNode]()
+
+    for (child <- children) {
+      childrenAsNodes :+ buildTree(child)
+    }
+
+    val functionName = extractFunctionName(inputAsJson)
+    val function = resolveFunction(functionName)
+
+    new FunctionNode(function, childrenAsNodes)
   }
 
   private def resolveFunction(name: String): (Seq[Double] => Double) = {
@@ -66,23 +82,6 @@ class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
       case "exp" => wrap(math.exp)
       case constant => ignoredInput => constant.toDouble
     }
-  }
-
-}
-
-object FunctionNode {
-
-  def buildTree(inputAsJson: JsObject): FunctionNode = {
-    val children = extractChildren(inputAsJson)
-    val childrenAsNodes = List[FunctionNode]()
-
-    for (child <- children) {
-      childrenAsNodes :+ buildTree(child)
-    }
-
-    val functionName = extractFunctionName(inputAsJson)
-
-    new FunctionNode(functionName, childrenAsNodes)
   }
 
   private def extractFunctionName(inputAsJson: JsObject): String = {

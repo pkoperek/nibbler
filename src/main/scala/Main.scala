@@ -39,14 +39,6 @@ object Main {
     return (1L, splittedStrings(1).toDouble)
   }
 
-  private def evaluate(timestampValues: RDD[(Long, Double)]): Double = {
-    val evaluationService = new EvaluationService(timestampValues)
-
-    evaluationService.evaluate({
-      x => x * 2
-    })
-  }
-
   def validate(args: Array[String]) = {
     if (args.length != 2) {
       println("Specify master URL and data files as parameters! Eg. mesos://149.156.10.32:1237 hdfs://master/data/data.csv")

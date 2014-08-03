@@ -50,32 +50,27 @@ class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
       case 0 => {
         functionName.toDouble
       }
-      case 1 => {
-        val function1Op = resolve1OpFunction(functionName)
-        function1Op(childrenEvaluated(0))
-      }
       case default => {
-        val functionMOp = resolveMultiOpFunction(functionName)
-        functionMOp(childrenEvaluated)
+        val function = resolveFunction(functionName)
+        function(childrenEvaluated)
       }
     }
   }
 
-  private def resolveMultiOpFunction(name: String): (Seq[Double] => Double) = {
+  private def resolveFunction(name: String): (Seq[Double] => Double) = {
+    def wrap(toWrap: (Double => Double)): (Seq[Double] => Double) = {
+      input: Seq[Double] => toWrap(input(0))
+    }
+
     name match {
       case "plus" => Functions.plus
       case "minus" => Functions.minus
       case "mul" => Functions.mul
       case "div" => Functions.div
-    }
-  }
-
-  private def resolve1OpFunction(name: String): (Double => Double) = {
-    name match {
-      case "sin" => math.sin
-      case "cos" => math.cos
-      case "tg" => math.tan
-      case "exp" => math.exp
+      case "sin" => wrap(math.sin)
+      case "cos" => wrap(math.cos)
+      case "tg" => wrap(math.tan)
+      case "exp" => wrap(math.exp)
     }
   }
 

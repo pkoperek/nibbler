@@ -54,12 +54,3 @@ object Main {
     }
   }
 }
-
-/*
-
-Launch on master the private ip is master's
-./spark-submit nibbler.jar --class Main mesos://172.16.67.196:5050 hdfs://172.16.67.196/data/test.csv
-export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
-export SPARK_EXECUTOR_URI=
-export MASTER=mesos://149.156.10.32:41047
-*/

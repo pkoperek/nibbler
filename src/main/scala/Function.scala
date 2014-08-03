@@ -1,4 +1,5 @@
-import spray.json.JsObject
+import scala.collection.mutable.ListBuffer
+import spray.json.{JsArray, JsObject}
 
 /**
  * User: koperek
@@ -50,12 +51,12 @@ object Functions {
 class FunctionNode(val function: Seq[Double] => Double, val children: Seq[FunctionNode]) {
 
   def evaluate(inputRow: Seq[Double]): Double = {
-    val childrenEvaluated = List[Double]()
+    val childrenEvaluated = ListBuffer[Double]()
     for (child <- children) {
       childrenEvaluated :+ child.evaluate(inputRow)
     }
 
-    function(childrenEvaluated)
+    function(childrenEvaluated.toList)
   }
 
 }
@@ -68,16 +69,16 @@ object Function {
 
   private def buildTree(inputAsJson: JsObject): FunctionNode = {
     val children = extractChildren(inputAsJson)
-    val childrenAsNodes = List[FunctionNode]()
+    val childrenAsNodes = ListBuffer[FunctionNode]()
 
     for (child <- children) {
-      childrenAsNodes :+ buildTree(child)
+      childrenAsNodes += buildTree(child)
     }
 
     val functionName = extractFunctionName(inputAsJson)
     val function = resolveFunction(functionName)
 
-    new FunctionNode(function, childrenAsNodes)
+    new FunctionNode(function, childrenAsNodes.toList)
   }
 
   private def resolveFunction(name: String): (Seq[Double] => Double) = {
@@ -107,7 +108,14 @@ object Function {
   }
 
   private def extractChildren(inputAsJson: JsObject): Seq[JsObject] = {
-    inputAsJson.getFields("operands").map(operandAsJsValue => operandAsJsValue.asJsObject)
+    println("visiting: " + inputAsJson)
+    val operands = inputAsJson.getFields("operands")
+    println("operands: " + operands)
+
+    if (operands.size != 0)
+      operands(0).asInstanceOf[JsArray].elements.map(x => x.asJsObject)
+    else
+      List()
   }
 
 }

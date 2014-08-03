@@ -1,39 +1,109 @@
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.SparkContext
 
-import scala.util.control.Exception._
 import org.scalatra._
-import scalate.ScalateSupport
 import spray.json._
-import DefaultJsonProtocol._
 import math._
 
-class Function {
+object Functions {
+  def plus(inputValues: Seq[Double]): Double = {
+    var result = 0.0
+    for (value <- inputValues) {
+      result += value
+    }
+    result
+  }
+
+  def mul(inputValues: Seq[Double]): Double = {
+    var result = inputValues(0)
+    for (idx <- 1 to inputValues.size) {
+      result *= inputValues(idx)
+    }
+    result
+  }
+
+  def div(inputValues: Seq[Double]): Double = {
+    var result = inputValues(0)
+    for (idx <- 1 to inputValues.size) {
+      result /= inputValues(idx)
+    }
+    result
+  }
+
+  def minus(inputValues: Seq[Double]): Double = {
+    var result = inputValues(0)
+    for (idx <- 1 to inputValues.size) {
+      result -= inputValues(idx)
+    }
+    result
+  }
+}
+
+class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
+
+  def evaluate(inputRow: Seq[Double]): Double = {
+    val childrenEvaluated = List[Double]()
+    for (child <- children) {
+      childrenEvaluated :+ child.evaluate(inputRow)
+    }
+
+    children.size match {
+      case 0 => {
+        functionName.toDouble
+      }
+      case 1 => {
+        val function1Op = resolve1OpFunction(functionName)
+        function1Op(childrenEvaluated(0))
+      }
+      case default => {
+        val functionMOp = resolveMultiOpFunction(functionName)
+        functionMOp(childrenEvaluated)
+      }
+    }
+  }
+
+  private def resolveMultiOpFunction(name: String): (Seq[Double] => Double) = {
+    name match {
+      case "plus" => Functions.plus
+      case "minus" => Functions.minus
+      case "mul" => Functions.mul
+      case "div" => Functions.div
+    }
+  }
+
+  private def resolve1OpFunction(name: String): (Double => Double) = {
+    name match {
+      case "sin" => math.sin
+      case "cos" => math.cos
+      case "tg" => math.tan
+      case "exp" => math.exp
+    }
+  }
 
 }
 
-class FunctionNode(val functionName: String, val operands: Seq[FunctionNode]) {
+object FunctionNode {
 
-  val evaluationFunction = resolve(functionName)
+  def buildTree(inputAsJson: JsObject): FunctionNode = {
+    val children = extractChildren(inputAsJson)
+    val childrenAsNodes = List[FunctionNode]()
 
-  def evaluate(): Double = {
-    1.0
-  }
-
-  def resolve(functionName: String): (Double => Double) = {
-    try {
-      val constant = functionName.toDouble
-      return (x: Double) => constant
-    } catch {
-      case e: NumberFormatException => println("This is not a number (" + functionName + ")... moving on")
+    for (child <- children) {
+      childrenAsNodes :+ buildTree(child)
     }
 
-    val fn: (Double => Double) = functionName match {
-      case "sin" => sin
-      case "cos" => cos
-    }
+    val functionName = extractFunctionName(inputAsJson)
 
-    return fn
+    new FunctionNode(functionName, childrenAsNodes)
   }
+
+  private def extractFunctionName(inputAsJson: JsObject): String = {
+    inputAsJson.getFields("name")(0).toString()
+  }
+
+  private def extractChildren(inputAsJson: JsObject): Seq[JsObject] = {
+    inputAsJson.getFields("operands").map(operandAsJsValue => operandAsJsValue.asJsObject)
+  }
+
 }
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {

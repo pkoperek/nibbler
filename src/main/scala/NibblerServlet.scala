@@ -46,15 +46,8 @@ class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
       childrenEvaluated :+ child.evaluate(inputRow)
     }
 
-    children.size match {
-      case 0 => {
-        functionName.toDouble
-      }
-      case default => {
-        val function = resolveFunction(functionName)
-        function(childrenEvaluated)
-      }
-    }
+    val function = resolveFunction(functionName)
+    function(childrenEvaluated)
   }
 
   private def resolveFunction(name: String): (Seq[Double] => Double) = {
@@ -71,6 +64,7 @@ class FunctionNode(val functionName: String, val children: Seq[FunctionNode]) {
       case "cos" => wrap(math.cos)
       case "tg" => wrap(math.tan)
       case "exp" => wrap(math.exp)
+      case constant => ignoredInput => constant.toDouble
     }
   }
 

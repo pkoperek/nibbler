@@ -98,8 +98,12 @@ object Function {
     }
   }
 
+  private def stripQuotes(toStrip: String): String = {
+    toStrip.trim.drop(1).dropRight(1)
+  }
+
   private def extractFunctionName(inputAsJson: JsObject): String = {
-    inputAsJson.getFields("name")(0).toString()
+    stripQuotes(inputAsJson.getFields("function")(0).toString())
   }
 
   private def extractChildren(inputAsJson: JsObject): Seq[JsObject] = {

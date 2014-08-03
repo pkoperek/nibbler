@@ -122,19 +122,7 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
     "Counted: " + input.count()
 
-    //    buildEvaluationFunction(expressionAsJson)
   }
 
-  private def buildEvaluationFunction(input: JsObject): FunctionNode = {
-    val functionName = input.getFields("name")(0).toString()
-    val operands = input.getFields("operands")
-
-    if (operands.nonEmpty) {
-      val operandsAsFunctionNodes = operands.map((operand: JsValue) => buildEvaluationFunction(operand.asJsObject))
-      new FunctionNode(functionName, operandsAsFunctionNodes)
-    } else {
-      new FunctionNode(functionName, List())
-    }
-  }
 }
 

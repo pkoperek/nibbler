@@ -29,7 +29,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create constant function") {
     // Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "123.456"
@@ -37,7 +36,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe (123.456 +- 0.0001)
@@ -45,7 +44,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create sin function") {
     // Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "sin",
@@ -56,7 +54,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe (math.sin(1.0) +- 0.001)
@@ -64,7 +62,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create cos function") {
     // Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "cos",
@@ -75,7 +72,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe (math.cos(2.0) +- 0.001)
@@ -83,7 +80,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create tg function") {
     // Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "tan",
@@ -94,7 +90,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe (math.tan(2.5) +- 0.001)
@@ -102,7 +98,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create exp function") {
     // Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "exp",
@@ -113,7 +108,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe (math.exp(2.5) +- 0.001)
@@ -121,7 +116,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create plus function") {
     //Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "plus",
@@ -134,7 +128,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe 3.0
@@ -142,7 +136,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create minus function") {
     //Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "minus",
@@ -155,7 +148,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe 6.0
@@ -163,7 +156,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create mul function") {
     //Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "mul",
@@ -176,7 +168,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe 3.0
@@ -184,7 +176,6 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create div function") {
     //Given
-    val parameters = List[Double]()
     val jsonText = """
          {
             "function": "div",
@@ -197,15 +188,15 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                    """
 
     // When
-    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
     evaluatedValue shouldBe 35.0
   }
 
-  private def evaluateJsonWithParams(jsonText: String, parameters: List[Double]): Double = {
+  private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)
-    function.evaluate(parameters)
+    function.evaluate(List())
   }
 }

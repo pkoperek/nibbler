@@ -104,6 +104,27 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     evaluatedValue shouldBe 6.0
   }
 
+  test("create mul function") {
+    //Given
+    val parameters = List[Double]()
+    val jsonText = """
+         {
+            "function": "mul",
+            "operands": [{
+                "function": "1.5"
+            }, {
+                "function": "2.0"
+            }]
+         }
+                   """
+
+    // When
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+
+    // Then
+    evaluatedValue shouldBe 3.0
+  }
+
   private def evaluateJsonWithParams(jsonText: String, parameters: List[Double]): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)

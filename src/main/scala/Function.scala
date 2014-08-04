@@ -25,7 +25,7 @@ object Functions {
 
   def mul(inputValues: Seq[Double]): Double = {
     var result = inputValues(0)
-    for (idx <- 1 to inputValues.size) {
+    for (idx <- 1 to inputValues.size - 1) {
       result *= inputValues(idx)
     }
     result
@@ -33,7 +33,7 @@ object Functions {
 
   def div(inputValues: Seq[Double]): Double = {
     var result = inputValues(0)
-    for (idx <- 1 to inputValues.size) {
+    for (idx <- 1 to inputValues.size - 1) {
       result /= inputValues(idx)
     }
     result

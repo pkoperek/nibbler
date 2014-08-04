@@ -81,6 +81,25 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     evaluatedValue shouldBe (math.cos(2.0) +- 0.001)
   }
 
+  test("create tg function") {
+    // Given
+    val parameters = List[Double]()
+    val jsonText = """
+         {
+            "function": "tan",
+            "operands": [{
+                "function": "2.5"
+            }]
+         }
+                   """
+
+    // When
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+
+    // Then
+    evaluatedValue shouldBe (math.tan(2.5) +- 0.001)
+  }
+
   test("create plus function") {
     //Given
     val parameters = List[Double]()

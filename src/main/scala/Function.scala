@@ -93,7 +93,7 @@ object Function {
       case "div" => Functions.div
       case "sin" => wrap(math.sin)
       case "cos" => wrap(math.cos)
-      case "tg" => wrap(math.tan)
+      case "tan" => wrap(math.tan)
       case "exp" => wrap(math.exp)
       case constant => ignoredInput => constant.toDouble
     }

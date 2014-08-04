@@ -29,48 +29,43 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 
   test("create constant function") {
     // Given
-    val json =
-      """
+    val parameters = List[Double]()
+    val jsonText = """
          {
             "function": "123.456"
          }
-      """.parseJson
-
-    val parameters = List[Double]()
+                   """
 
     // When
-    val function = Function.buildFunction(json.asJsObject)
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
 
     // Then
-    val evaluatedValue = function.evaluate(parameters)
     evaluatedValue shouldBe (123.456 +- 0.0001)
   }
 
   test("create sin function") {
     // Given
-    val json =
-      """
+    val parameters = List[Double]()
+    val jsonText = """
          {
             "function": "sin",
             "operands": [{
                 "function": "1.0"
             }]
          }
-      """.parseJson
-
-    val parameters = List[Double]()
+                   """
 
     // When
-    val function = Function.buildFunction(json.asJsObject)
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
 
     // Then
-    function.evaluate(parameters) shouldBe (math.sin(1.0))
+    evaluatedValue shouldBe (math.sin(1.0))
   }
 
   test("create plus function") {
-    // Given
-    val json =
-      """
+    //Given
+    val parameters = List[Double]()
+    val jsonText = """
          {
             "function": "plus",
             "operands": [{
@@ -79,15 +74,18 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
                 "function": "2.0"
             }]
          }
-      """.parseJson
-
-    val parameters = List[Double]()
+                   """
 
     // When
-    val function = Function.buildFunction(json.asJsObject)
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
 
     // Then
-    function.evaluate(parameters) shouldBe 3.0
+    evaluatedValue shouldBe 3.0
   }
 
+  private def evaluateJsonWithParams(jsonText: String, parameters: List[Double]): Double = {
+    val json = jsonText.parseJson
+    val function = Function.buildFunction(json.asJsObject)
+    function.evaluate(parameters)
+  }
 }

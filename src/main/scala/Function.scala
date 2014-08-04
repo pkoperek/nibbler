@@ -41,7 +41,7 @@ object Functions {
 
   def minus(inputValues: Seq[Double]): Double = {
     var result = inputValues(0)
-    for (idx <- 1 to inputValues.size) {
+    for (idx <- 1 to inputValues.size - 1) {
       result -= inputValues(idx)
     }
     result

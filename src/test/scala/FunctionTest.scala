@@ -100,6 +100,25 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     evaluatedValue shouldBe (math.tan(2.5) +- 0.001)
   }
 
+  test("create exp function") {
+    // Given
+    val parameters = List[Double]()
+    val jsonText = """
+         {
+            "function": "exp",
+            "operands": [{
+                "function": "2.5"
+            }]
+         }
+                   """
+
+    // When
+    val evaluatedValue = evaluateJsonWithParams(jsonText, parameters)
+
+    // Then
+    evaluatedValue shouldBe (math.exp(2.5) +- 0.001)
+  }
+
   test("create plus function") {
     //Given
     val parameters = List[Double]()

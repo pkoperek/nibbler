@@ -87,7 +87,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val function = Function.buildFunction(json.asJsObject)
 
     // Then
-    function.evaluate(parameters) shouldBe (math.sin(1.0))
+    function.evaluate(parameters) shouldBe 3.0
   }
 
 }

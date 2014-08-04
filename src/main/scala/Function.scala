@@ -53,7 +53,7 @@ class FunctionNode(val function: Seq[Double] => Double, val children: Seq[Functi
   def evaluate(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = ListBuffer[Double]()
     for (child <- children) {
-      childrenEvaluated :+ child.evaluate(inputRow)
+      childrenEvaluated += child.evaluate(inputRow)
     }
 
     function(childrenEvaluated.toList)

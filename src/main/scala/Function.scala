@@ -108,9 +108,7 @@ object Function {
   }
 
   private def extractChildren(inputAsJson: JsObject): Seq[JsObject] = {
-    println("visiting: " + inputAsJson)
     val operands = inputAsJson.getFields("operands")
-    println("operands: " + operands)
 
     if (operands.size != 0)
       operands(0).asInstanceOf[JsArray].elements.map(x => x.asJsObject)

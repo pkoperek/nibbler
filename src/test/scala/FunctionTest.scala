@@ -194,6 +194,27 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     evaluatedValue shouldBe 35.0
   }
 
+  test("create nested function") {
+    //Given
+    val jsonText = """
+         {
+            "function": "sin",
+            "operands": [{
+                "function": "cos",
+                "operands": [{
+                    "function": "100.0"
+                }]
+            }]
+         }
+                   """
+
+    // When
+    val evaluatedValue = evaluateJsonWithParams(jsonText)
+
+    // Then
+    evaluatedValue shouldBe (math.sin(math.cos(100.0)) +- 0.0001)
+  }
+
   private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)

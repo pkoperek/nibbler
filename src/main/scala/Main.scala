@@ -39,14 +39,6 @@ object Main {
     return (1L, splittedStrings(1).toDouble)
   }
 
-  private def evaluate(timestampValues: RDD[(Long, Double)]): Double = {
-    val evaluationService = new EvaluationService(timestampValues)
-
-    evaluationService.evaluate({
-      x => x * 2
-    })
-  }
-
   def validate(args: Array[String]) = {
     if (args.length != 2) {
       println("Specify master URL and data files as parameters! Eg. mesos://149.156.10.32:1237 hdfs://master/data/data.csv")
@@ -54,12 +46,3 @@ object Main {
     }
   }
 }
-
-/*
-
-Launch on master the private ip is master's
-./spark-submit nibbler.jar --class Main mesos://172.16.67.196:5050 hdfs://172.16.67.196/data/test.csv
-export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
-export SPARK_EXECUTOR_URI=
-export MASTER=mesos://149.156.10.32:41047
-*/

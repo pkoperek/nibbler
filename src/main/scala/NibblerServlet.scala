@@ -1,40 +1,9 @@
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.SparkContext
 
-import scala.util.control.Exception._
 import org.scalatra._
-import scalate.ScalateSupport
 import spray.json._
-import DefaultJsonProtocol._
-import math._
 
-class Function {
 
-}
-
-class FunctionNode(val functionName: String, val operands: Seq[FunctionNode]) {
-
-  val evaluationFunction = resolve(functionName)
-
-  def evaluate(): Double = {
-    1.0
-  }
-
-  def resolve(functionName: String): (Double => Double) = {
-    try {
-      val constant = functionName.toDouble
-      return (x: Double) => constant
-    } catch {
-      case e: NumberFormatException => println("This is not a number (" + functionName + ")... moving on")
-    }
-
-    val fn: (Double => Double) = functionName match {
-      case "sin" => sin
-      case "cos" => cos
-    }
-
-    return fn
-  }
-}
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
@@ -49,22 +18,13 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
     val inputFile = requestAsJson.getFields("inputFile")(0).toString().dropRight(1).drop(1)
     val input = sparkContext.textFile(inputFile)
+    
+    val function = requestAsJson.getFields("function")(0)
+    val functionDeserialized = Function.buildFunction(function.asJsObject)
+    
+    "Counted: " + input.count() + "\n" + functionDeserialized.toString()
 
-    "Counted: " + input.count()
-
-    //    buildEvaluationFunction(expressionAsJson)
   }
 
-  private def buildEvaluationFunction(input: JsObject): FunctionNode = {
-    val functionName = input.getFields("name")(0).toString()
-    val operands = input.getFields("operands")
-
-    if (operands.nonEmpty) {
-      val operandsAsFunctionNodes = operands.map((operand: JsValue) => buildEvaluationFunction(operand.asJsObject))
-      new FunctionNode(functionName, operandsAsFunctionNodes)
-    } else {
-      new FunctionNode(functionName, List())
-    }
-  }
 }
 

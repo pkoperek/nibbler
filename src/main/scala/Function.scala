@@ -1,11 +1,6 @@
 import scala.collection.mutable.ListBuffer
 import spray.json.{JsArray, JsObject}
 
-/**
- * User: koperek
- * Date: 03.08.14
- * Time: 16:34
- */
 class Function(functionTree: FunctionNode) {
 
   def evaluate(input: Seq[Double]): Double = {

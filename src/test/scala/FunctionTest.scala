@@ -6,12 +6,6 @@ import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.verify
 
-/**
- *
- * User: koperek
- * Date: 03.08.14
- * Time: 18:24
- */
 @RunWith(classOf[JUnitRunner])
 class FunctionTest extends FunSuite with MockitoSugar with Matchers {
 

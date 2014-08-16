@@ -6,13 +6,14 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.scalatest.FunSuiteLike
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 import org.scalatra.test.scalatest.ScalatraSuite
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
-class NibblerServletTest extends ScalatraSuite with FunSuiteLike {
+class NibblerServletTest extends ScalatraSuite with FunSuiteLike with MockitoSugar {
 
-  val sparkContext = Mockito.mock(classOf[SparkContext])
+  val sparkContext = mock[SparkContext]
 
   addServlet(classOf[NibblerServlet], "/*")
 

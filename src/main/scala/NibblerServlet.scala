@@ -18,10 +18,13 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
     val inputFile = requestAsJson.getFields("inputFile")(0).toString().dropRight(1).drop(1)
     val input = sparkContext.textFile(inputFile)
-    
+
     val function = requestAsJson.getFields("function")(0)
     val functionDeserialized = Function.buildFunction(function.asJsObject)
-    
+    input.map {
+      _.split("")
+    }
+
     "Counted: " + input.count() + "\n" + functionDeserialized.toString()
 
   }

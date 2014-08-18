@@ -1,8 +1,6 @@
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
-import scala.collection.mutable.ListBuffer
-
 trait NumericalDifferentiator {
   def partialDerivative(input: RDD[Seq[Double]]): RDD[Double]
 }

@@ -9,8 +9,19 @@ import org.mockito.Mockito.verify
 @RunWith(classOf[JUnitRunner])
 class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSugar  {
 
-  test("first test case") {
-    fail("failing on purpose!")
+  test("accepts 'backward' as differentiator strategy") {
+    NumericalDifferentiator("backward", 0, 1)
   }
+
+  test("accepts 'central' as differentiator strategy") {
+    NumericalDifferentiator("central", 0, 1)
+  }
+
+  test("indexes of variables cannot be the same") {
+    intercept[IllegalArgumentException] {
+      NumericalDifferentiator("central", 1, 1)
+    }
+  }
+
 
 }

@@ -7,6 +7,11 @@ trait NumericalDifferentiator {
 
 object NumericalDifferentiator {
   def apply(name: String, differentialQuotientDividend: Int, differentialQuotientDivisor: Int): NumericalDifferentiator = {
+
+    if(differentialQuotientDividend == differentialQuotientDivisor) {
+      throw new IllegalArgumentException("dividend index can't be equal to divisor index!")
+    }
+
     name match {
       case "backward" => new BackwardNumericalDifferentiator(differentialQuotientDividend, differentialQuotientDivisor)
       case "central" => new CentralNumericalDifferentiator(differentialQuotientDividend, differentialQuotientDivisor)

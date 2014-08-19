@@ -10,11 +10,19 @@ import org.mockito.Mockito.verify
 class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSugar  {
 
   test("accepts 'backward' as differentiator strategy") {
-    NumericalDifferentiator("backward", 0, 1)
+    try { 
+      NumericalDifferentiator("backward", 0, 1)
+    } catch {
+      case _: Exception => fail("shouldn't throw an exception!")
+    }
   }
 
   test("accepts 'central' as differentiator strategy") {
-    NumericalDifferentiator("central", 0, 1)
+    try { 
+      NumericalDifferentiator("central", 0, 1)
+    } catch {
+      case _: Exception => fail("shouldn't throw an exception!")
+    }
   }
 
   test("indexes of variables cannot be the same") {

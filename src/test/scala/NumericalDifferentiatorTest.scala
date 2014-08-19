@@ -5,6 +5,9 @@ import org.scalatest.Matchers
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.verify
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 @RunWith(classOf[JUnitRunner])
 class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSugar  {
@@ -31,5 +34,18 @@ class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSug
     }
   }
 
+  test("backward: differentiates the rdd according to formula") {
+    // Given
+    val differentiator = NumericalDifferentiator("backward", 0, 1)
+    val configuration = new SparkConf().setAppName("test").setMaster("local")
+    val sparkContext = new SparkContext(configuration)
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0), List(20.0), List(30.0), List(40.0), List(50.0), List(60.0), List(70.0), List(80.0), List(90.0), List(100.0)))
+
+    // When
+    val result = differentiator.partialDerivative(input)
+
+    // Then
+    result.collect() should contain inOrderOnly (20.0, 30.0, 40.0, 50.0)
+  }
 
 }

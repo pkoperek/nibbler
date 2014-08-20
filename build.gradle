@@ -36,7 +36,7 @@ dependencies {
     testCompile group: "org.mockito", name: "mockito-all", version: "1.9.5"
 
     // container used to run from gradle
-    container group: 'org.eclipse.jetty', name: 'jetty-plus', version: '8.1.15.v20140411'
+    container group: 'org.eclipse.jetty', name: 'jetty-runner', version: '9.2.1.v20140609'
 
     // servlet api
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'

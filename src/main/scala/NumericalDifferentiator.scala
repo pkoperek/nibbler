@@ -1,7 +1,7 @@
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
-trait NumericalDifferentiator {
+trait NumericalDifferentiator extends Serializable  {
   def partialDerivative(input: RDD[Seq[Double]]): RDD[Double]
 }
 

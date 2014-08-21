@@ -1,5 +1,6 @@
-import scala.collection.mutable.ListBuffer
 import spray.json.{JsArray, JsObject}
+
+import scala.collection.mutable.ListBuffer
 
 class Function(functionTree: FunctionNode) {
 

@@ -1,10 +1,10 @@
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import spray.json._
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.verify
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.mock.MockitoSugar
+import spray.json._
 
 @RunWith(classOf[JUnitRunner])
 class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {

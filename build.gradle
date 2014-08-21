@@ -25,14 +25,14 @@ dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.10'
 
     // scalatra deps
-    compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.3.0'
-    compile group: 'org.scalatra', name: 'scalatra-scalate_2.10', version: '2.3.0'
+    compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.2.2'
+    compile group: 'org.scalatra', name: 'scalatra-scalate_2.10', version: '2.2.2'
 
     // spray json
     compile group: 'io.spray', name: 'spray-json_2.10', version: '1.2.6'
 
     // test
-    testCompile group: "org.scalatra", name: "scalatra-scalatest_2.10", version: "2.3.0"
+    testCompile group: "org.scalatra", name: "scalatra-scalatest_2.10", version: "2.2.2"
     testCompile group: "org.mockito", name: "mockito-all", version: "1.9.5"
 
     // container used to run from gradle

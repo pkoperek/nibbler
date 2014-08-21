@@ -34,12 +34,27 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     }
   }
 
-  test("input data set needs to have at least two variables") {
+  test("validates input data set has at least two variables") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
     val configuration = new SparkConf().setAppName("test").setMaster("local")
     val sparkContext = new SparkContext(configuration)
-    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0), List(20.0)))
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 20.0)))
+     
+    // Then
+    try {
+      differentiator.partialDerivative(input)
+    } catch {
+      case _: Exception => fail("no exception should be thrown")
+    }
+  }
+
+  test("accepts data set with two variables") {
+    // Given
+    val differentiator = NumericalDifferentiator("backward", 0, 1)
+    val configuration = new SparkConf().setAppName("test").setMaster("local")
+    val sparkContext = new SparkContext(configuration)
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0)))
      
     // Then
     intercept[IllegalArgumentException] {
@@ -47,18 +62,32 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     }
   }
 
-  test("backward: differentiates the rdd according to formula") {
+   test("backward: differentiates the rdd according to formula") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
     val configuration = new SparkConf().setAppName("test").setMaster("local")
     val sparkContext = new SparkContext(configuration)
-    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(20.0, 2.0)))
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(20.0, 3.0)))
 
     // When
     val result = differentiator.partialDerivative(input).collect()
 
     // Then
-    result should equal (Array(10.0))
+    result should equal (Array(5.0))
+  }
+
+  test("central: differentiates the rdd according to formula") {
+    // Given
+    val differentiator = NumericalDifferentiator("central", 0, 1)
+    val configuration = new SparkConf().setAppName("test").setMaster("local")
+    val sparkContext = new SparkContext(configuration)
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(100.0, 100.0), List(20.0, 5.0)))
+
+    // When
+    val result = differentiator.partialDerivative(input).collect()
+
+    // Then
+    result should equal (Array(2.5))
   }
 
 }

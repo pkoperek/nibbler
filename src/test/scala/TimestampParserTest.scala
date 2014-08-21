@@ -14,7 +14,7 @@ class TimestampParserTest extends FunSuite with MockitoSugar with ShouldMatchers
     val timestamp = parser.parse(timestampAsString)
 
     // Then
-    timestamp should equal (959704056000L)
+    timestamp should equal(959704056000L)
   }
 
 }

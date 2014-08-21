@@ -1,19 +1,16 @@
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import spray.json._
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.verify
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar  {
+class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar {
 
   test("accepts 'backward' as differentiator strategy") {
-    try { 
+    try {
       NumericalDifferentiator("backward", 0, 1)
     } catch {
       case _: Exception => fail("shouldn't throw an exception!")
@@ -21,7 +18,7 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
   }
 
   test("accepts 'central' as differentiator strategy") {
-    try { 
+    try {
       NumericalDifferentiator("central", 0, 1)
     } catch {
       case _: Exception => fail("shouldn't throw an exception!")
@@ -40,7 +37,7 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     val configuration = new SparkConf().setAppName("test").setMaster("local")
     val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 20.0)))
-     
+
     // Then
     try {
       differentiator.partialDerivative(input)
@@ -55,14 +52,14 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     val configuration = new SparkConf().setAppName("test").setMaster("local")
     val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0)))
-     
+
     // Then
     intercept[IllegalArgumentException] {
       differentiator.partialDerivative(input)
     }
   }
 
-   test("backward: differentiates the rdd according to formula") {
+  test("backward: differentiates the rdd according to formula") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
     val configuration = new SparkConf().setAppName("test").setMaster("local")
@@ -73,7 +70,7 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     val result = differentiator.partialDerivative(input).collect()
 
     // Then
-    result should equal (Array(5.0))
+    result should equal(Array(5.0))
   }
 
   test("central: differentiates the rdd according to formula") {
@@ -87,7 +84,7 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     val result = differentiator.partialDerivative(input).collect()
 
     // Then
-    result should equal (Array(2.5))
+    result should equal(Array(2.5))
   }
 
 }

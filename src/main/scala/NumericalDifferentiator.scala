@@ -2,7 +2,20 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 trait NumericalDifferentiator extends Serializable  {
-  def partialDerivative(input: RDD[Seq[Double]]): RDD[Double]
+  def partialDerivative(input: RDD[Seq[Double]]): RDD[Double] = {
+    if(!validateInput(input)) {
+      throw new IllegalArgumentException("Dataset doesn't contain at least two values in sequence!")
+    }
+
+    partialDerivativeInternal(input)
+  }
+
+  def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double]
+
+  def validateInput(input: RDD[Seq[Double]]): Boolean = {
+    val firstSequence = input.first()
+    firstSequence.size >= 2
+  }
 }
 
 object NumericalDifferentiator {
@@ -22,7 +35,7 @@ object NumericalDifferentiator {
    * x_n - x_n-1
    */
   private class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
-    override def partialDerivative(input: RDD[Seq[Double]]): RDD[Double] = {
+    override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
 
       val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map {
         _.swap
@@ -47,7 +60,7 @@ object NumericalDifferentiator {
    * x_n - x_n-2
    */
   private class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
-    override def partialDerivative(input: RDD[Seq[Double]]): RDD[Double] = {
+    override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
 
       val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map {
         _.swap

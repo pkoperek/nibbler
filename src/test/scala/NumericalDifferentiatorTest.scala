@@ -34,18 +34,31 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
     }
   }
 
+  test("input data set needs to have at least two variables") {
+    // Given
+    val differentiator = NumericalDifferentiator("backward", 0, 1)
+    val configuration = new SparkConf().setAppName("test").setMaster("local")
+    val sparkContext = new SparkContext(configuration)
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0), List(20.0)))
+     
+    // Then
+    intercept[IllegalArgumentException] {
+      differentiator.partialDerivative(input)
+    }
+  }
+
   test("backward: differentiates the rdd according to formula") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
     val configuration = new SparkConf().setAppName("test").setMaster("local")
     val sparkContext = new SparkContext(configuration)
-    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0), List(20.0), List(30.0), List(40.0), List(50.0), List(60.0), List(70.0), List(80.0), List(90.0), List(100.0)))
+    val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(20.0, 2.0)))
 
     // When
     val result = differentiator.partialDerivative(input).collect()
 
     // Then
-    result should equal (Array(20.0, 30.0, 40.0, 50.0))
+    result should equal (Array(10.0))
   }
 
 }

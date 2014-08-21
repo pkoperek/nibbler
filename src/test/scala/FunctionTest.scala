@@ -1,13 +1,13 @@
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import spray.json._
-import org.scalatest.Matchers
+import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.verify
 
 @RunWith(classOf[JUnitRunner])
-class FunctionTest extends FunSuite with MockitoSugar with Matchers {
+class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("evaluate should invoke inner tree evaluate") {
     // Given
@@ -33,7 +33,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (123.456 +- 0.0001)
+    evaluatedValue should be (123.456 plusOrMinus 0.0001)
   }
 
   test("create sin function") {
@@ -51,7 +51,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (math.sin(1.0) +- 0.001)
+    evaluatedValue should be (math.sin(1.0) plusOrMinus 0.001)
   }
 
   test("create cos function") {
@@ -69,7 +69,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (math.cos(2.0) +- 0.001)
+    evaluatedValue should be (math.cos(2.0) plusOrMinus 0.001)
   }
 
   test("create tg function") {
@@ -87,7 +87,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (math.tan(2.5) +- 0.001)
+    evaluatedValue should be (math.tan(2.5) plusOrMinus 0.001)
   }
 
   test("create exp function") {
@@ -105,7 +105,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (math.exp(2.5) +- 0.001)
+    evaluatedValue should be (math.exp(2.5) plusOrMinus 0.001)
   }
 
   test("create plus function") {
@@ -125,7 +125,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe 3.0
+    evaluatedValue should be === 3.0
   }
 
   test("create minus function") {
@@ -145,7 +145,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe 6.0
+    evaluatedValue should be === 6.0
   }
 
   test("create mul function") {
@@ -165,7 +165,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe 3.0
+    evaluatedValue should be === 3.0
   }
 
   test("create div function") {
@@ -185,7 +185,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe 35.0
+    evaluatedValue should be === 35.0
   }
 
   test("create nested function") {
@@ -206,7 +206,7 @@ class FunctionTest extends FunSuite with MockitoSugar with Matchers {
     val evaluatedValue = evaluateJsonWithParams(jsonText)
 
     // Then
-    evaluatedValue shouldBe (math.sin(math.cos(100.0)) +- 0.0001)
+    evaluatedValue should be (math.sin(math.cos(100.0)) plusOrMinus 0.0001)
   }
 
   private def evaluateJsonWithParams(jsonText: String): Double = {

@@ -1,7 +1,7 @@
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import spray.json._
-import org.scalatest.Matchers
+import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.verify
@@ -10,7 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 @RunWith(classOf[JUnitRunner])
-class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSugar  {
+class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar  {
 
   test("accepts 'backward' as differentiator strategy") {
     try { 
@@ -42,10 +42,10 @@ class NumericalDifferentiatorTest extends FunSuite with Matchers with MockitoSug
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0), List(20.0), List(30.0), List(40.0), List(50.0), List(60.0), List(70.0), List(80.0), List(90.0), List(100.0)))
 
     // When
-    val result = differentiator.partialDerivative(input)
+    val result = differentiator.partialDerivative(input).collect()
 
     // Then
-    result.collect() should contain inOrderOnly (20.0, 30.0, 40.0, 50.0)
+    result should equal (Array(20.0, 30.0, 40.0, 50.0))
   }
 
 }

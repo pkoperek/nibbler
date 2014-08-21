@@ -1,7 +1,8 @@
-import org.scalatest.{Matchers, FunSuite}
+import org.scalatest.FunSuite
+import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 
-class TimestampParserTest extends FunSuite with MockitoSugar with Matchers {
+class TimestampParserTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("should parse timestamp") {
 
@@ -13,7 +14,7 @@ class TimestampParserTest extends FunSuite with MockitoSugar with Matchers {
     val timestamp = parser.parse(timestampAsString)
 
     // Then
-    timestamp shouldBe 959704056000L
+    timestamp should equal (959704056000L)
   }
 
 }

@@ -8,6 +8,10 @@ mainClassName = 'org.eclipse.jetty.runner.Runner'
 
 configurations {
     container // group for jetty container used to run webapp from ./gradlew jettyRun
+ 
+   // need to exclude this because there is a clash between spark's version of akka
+   // and akka coming from scalatest
+   testRuntime.exclude group: "com.typesafe.akka", module:"akka-actor_2.10"
 }
 
 repositories
@@ -25,15 +29,15 @@ dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.10'
 
     // scalatra deps
-    compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.3.0'
-    compile group: 'org.scalatra', name: 'scalatra-scalate_2.10', version: '2.3.0'
+    compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.2.2'
+    compile group: 'org.scalatra', name: 'scalatra-scalate_2.10', version: '2.2.2'
 
     // spray json
     compile group: 'io.spray', name: 'spray-json_2.10', version: '1.2.6'
 
     // test
-    testCompile group: "org.scalatra", name: "scalatra-scalatest_2.10", version: "2.3.0"
     testCompile group: "org.mockito", name: "mockito-all", version: "1.9.5"
+    testCompile group: "org.scalatra", name: "scalatra-scalatest_2.10", version: "2.2.2"
 
     // container used to run from gradle
     container group: 'org.eclipse.jetty', name: 'jetty-runner', version: '9.2.1.v20140609'

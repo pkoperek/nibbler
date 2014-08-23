@@ -17,9 +17,9 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   post("/evaluate") {
     val requestAsJson = request.body.parseJson.asJsObject
 
-    val inputFile = requestAsJson.getFields("inputFile")(0).toString().dropRight(1).drop(1)
-    val input = sparkContext.textFile(inputFile)
-    
+    val inputFile = toString(requestAsJson.getFields("inputFile"))
+    val inputAsText = sparkContext.textFile(inputFile)
+
     val function = requestAsJson.getFields("function")(0)
     val functionDeserializeed = Function.buildFunction(function.asJsObject)
     val input: RDD[Seq[Double]] = inputAsText.map(
@@ -36,8 +36,6 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
       0,
       1)
     val numericallyDifferentiated = differentiator.partialDerivative(input)
-
-    
 
   }
 

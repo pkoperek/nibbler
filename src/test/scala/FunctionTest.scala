@@ -209,6 +209,17 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     evaluatedValue should be (math.sin(math.cos(100.0)) plusOrMinus 0.0001)
   }
 
+  test("FunctionNode stores name") {
+    // Given
+    val functionName = "sin"
+
+    // When
+    val storedFunctionName = new FunctionNode(functionName, List()).name()
+
+    // Then
+    storedFunctionName should equal (functionName)
+  }
+
   private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)

@@ -48,6 +48,10 @@ class FunctionNode(functionName: String, children: Seq[FunctionNode]) {
 
   val function: Seq[Double] => Double = resolveFunction(functionName)
 
+  def name() = {
+    this.functionName
+  }
+
   def evaluate(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = ListBuffer[Double]()
     for (child <- children) {

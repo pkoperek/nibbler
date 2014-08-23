@@ -44,7 +44,9 @@ object Functions {
   }
 }
 
-class FunctionNode(function: Seq[Double] => Double, children: Seq[FunctionNode]) {
+class FunctionNode(functionName: String, children: Seq[FunctionNode]) {
+
+  val function: Seq[Double] => Double = resolveFunction(functionName)
 
   def evaluate(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = ListBuffer[Double]()
@@ -53,6 +55,24 @@ class FunctionNode(function: Seq[Double] => Double, children: Seq[FunctionNode])
     }
 
     function(childrenEvaluated.toList)
+  }
+
+  private def resolveFunction(name: String): (Seq[Double] => Double) = {
+    def wrap(toWrap: (Double => Double)): (Seq[Double] => Double) = {
+      input: Seq[Double] => toWrap(input(0))
+    }
+
+    name match {
+      case "plus" => Functions.plus
+      case "minus" => Functions.minus
+      case "mul" => Functions.mul
+      case "div" => Functions.div
+      case "sin" => wrap(math.sin)
+      case "cos" => wrap(math.cos)
+      case "tan" => wrap(math.tan)
+      case "exp" => wrap(math.exp)
+      case constant => ignoredInput => constant.toDouble
+    }
   }
 
 }
@@ -72,27 +92,8 @@ object Function {
     }
 
     val functionName = extractFunctionName(inputAsJson)
-    val function = resolveFunction(functionName)
 
-    new FunctionNode(function, childrenAsNodes.toList)
-  }
-
-  private def resolveFunction(name: String): (Seq[Double] => Double) = {
-    def wrap(toWrap: (Double => Double)): (Seq[Double] => Double) = {
-      input: Seq[Double] => toWrap(input(0))
-    }
-
-    name match {
-      case "plus" => Functions.plus
-      case "minus" => Functions.minus
-      case "mul" => Functions.mul
-      case "div" => Functions.div
-      case "sin" => wrap(math.sin)
-      case "cos" => wrap(math.cos)
-      case "tan" => wrap(math.tan)
-      case "exp" => wrap(math.exp)
-      case constant => ignoredInput => constant.toDouble
-    }
+    new FunctionNode(functionName, childrenAsNodes.toList)
   }
 
   private def stripQuotes(toStrip: String): String = {

@@ -8,9 +8,15 @@ class Function(functionTree: FunctionNode) {
     functionTree.evaluate(input)
   }
 
+  def differentiate(differentiateBy: String): Function = {
+    null
+  }
+
 }
 
 object BasicFunctions {
+  private val VariablePattern = "var_(\\d+)".r
+
   private def plus(inputValues: Seq[Double]): Double = {
     var result = 0.0
     for (value <- inputValues) {
@@ -48,6 +54,10 @@ object BasicFunctions {
       input: Seq[Double] => toWrap(input(0))
     }
 
+    def seqSelector(indexToSelect: Int): (Seq[Double] => Double) = {
+      input: Seq[Double] => input(indexToSelect)
+    }
+
     name match {
       case "plus" => BasicFunctions.plus
       case "minus" => BasicFunctions.minus
@@ -57,6 +67,7 @@ object BasicFunctions {
       case "cos" => wrap(math.cos)
       case "tan" => wrap(math.tan)
       case "exp" => wrap(math.exp)
+      case VariablePattern(variableIndex) => seqSelector(variableIndex.toInt)
       case constant => ignoredInput => constant.toDouble
     }
   }
@@ -72,6 +83,18 @@ class FunctionNode(functionName: String, children: Seq[FunctionNode]) {
   }
 
   def evaluate(inputRow: Seq[Double]): Double = {
+    if (children.size > 0) {
+      processNonLeaf(inputRow)
+    } else {
+      processLeaf(inputRow)
+    }
+  }
+
+  private def processLeaf(inputRow: Seq[Double]): Double = {
+    function(inputRow)
+  }
+
+  private def processNonLeaf(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = ListBuffer[Double]()
     for (child <- children) {
       childrenEvaluated += child.evaluate(inputRow)

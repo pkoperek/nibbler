@@ -300,6 +300,28 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     differentiated.evaluate(List(1.0)) should be(-Math.sin(1.0) plusOrMinus 0.0001)
   }
 
+  test("differentiates symbolically plus") {
+    // Given
+    val toDifferentiate: Function = new Function(new FunctionNode("plus", List(nodeWithVariable("sin"), constant("10"))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(2.0)) should be(Math.cos(2.0) plusOrMinus 0.0001)
+  }
+
+  test("differentiates symbolically minus") {
+    // Given
+    val toDifferentiate: Function = new Function(new FunctionNode("minus", List(constant("10"), nodeWithVariable("sin"))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(3.0)) should be(-Math.cos(3.0) plusOrMinus 0.0001)
+  }
+
   test("differentiates by non existing variable should return 0") {
     // When
     val differentiated = functionWithVariable("sin").differentiate("var_999")
@@ -315,7 +337,11 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
   }
 
   private def functionWithVariable(name: String): Function = {
-    new Function(new FunctionNode(name, List(new FunctionNode("var_0", List()))))
+    new Function(nodeWithVariable(name))
+  }
+
+  private def nodeWithVariable(name: String): FunctionNode = {
+    new FunctionNode(name, List(new FunctionNode("var_0", List())))
   }
 
   private def constant(constantValue: String): FunctionNode = {

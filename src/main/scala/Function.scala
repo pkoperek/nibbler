@@ -51,6 +51,12 @@ private object SymbolicDifferentiation {
             ++
             differentiate(nodeToDifferentiate.children(), differentiateBy))
 
+      case "plus" =>
+        node("plus", differentiate(nodeToDifferentiate.children(), differentiateBy))
+
+      case "minus" =>
+        node("minus", differentiate(nodeToDifferentiate.children(), differentiateBy))
+
       case `differentiateBy` => node("1.0")
       case AnyVariable() => constant_0
       case AnyConstant(_) => constant_0

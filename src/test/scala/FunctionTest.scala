@@ -248,37 +248,63 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     children should contain(childFunction)
   }
 
-  test("differentiates symbolically sin") {
+  test("differentiates symbolically a constant integer") {
     // Given
-    val function = new Function(new FunctionNode("sin", List(new FunctionNode("var_0", List()))))
+    val functionTree = constant("123")
 
     // When
-    val differentiated = function.differentiate("var_0")
+    val differentiated = new Function(functionTree).differentiate("var_0")
 
     // Then
+    differentiated.evaluate(List(1.0)) should be(0.0)
 
-    println("Before:")
-    println(function)
-    println("After:")
-    println(differentiated)
+  }
 
+  test("differentiates symbolically a constant double") {
+    // Given
+    val functionTree = constant("123.0")
+
+    // When
+    val differentiated = new Function(functionTree).differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(1.0)) should be(0.0)
+
+  }
+
+  test("differentiates symbolically a constant with a dot") {
+    // Given
+    val functionTree = constant("333.")
+
+    // When
+    val differentiated = new Function(functionTree).differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(1.0)) should be(0.0)
+
+  }
+
+  test("differentiates symbolically sin") {
+    // When
+    val differentiated = functionWithVariable("sin").differentiate("var_0")
+
+    // Then
     differentiated.evaluate(List(1.0)) should be(Math.cos(1.0) plusOrMinus 0.0001)
   }
 
-  test("differentiates by non existing variable should return 0") {
-    // Given
-    val function = new Function(new FunctionNode("sin", List(new FunctionNode("var_0", List()))))
-
+  test("differentiates symbolically cos") {
     // When
-    val differentiated = function.differentiate("var_999")
+    val differentiated = functionWithVariable("cos").differentiate("var_0")
 
     // Then
+    differentiated.evaluate(List(1.0)) should be(-Math.sin(1.0) plusOrMinus 0.0001)
+  }
 
-    println("Before:")
-    println(function)
-    println("After:")
-    println(differentiated)
+  test("differentiates by non existing variable should return 0") {
+    // When
+    val differentiated = functionWithVariable("sin").differentiate("var_999")
 
+    // Then
     differentiated.evaluate(List(1.0)) should equal(0.0)
   }
 
@@ -286,5 +312,13 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)
     function.evaluate(List())
+  }
+
+  private def functionWithVariable(name: String): Function = {
+    new Function(new FunctionNode(name, List(new FunctionNode("var_0", List()))))
+  }
+
+  private def constant(constantValue: String): FunctionNode = {
+    new FunctionNode(constantValue, List())
   }
 }

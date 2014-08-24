@@ -21,16 +21,48 @@ class Function(functionTree: FunctionNode) {
 private object SymbolicDifferentiation {
 
   private val AnyVariable = "var_\\d+".r
+  private val constant_0: FunctionNode = node("0.0", List())
+
+  private object AnyConstant {
+    def unapply(candidate: String): Option[Double] = {
+      try {
+        Some(candidate.toDouble)
+      } catch {
+        case _: Exception => None
+      }
+    }
+  }
 
   def differentiate(nodeToDifferentiate: FunctionNode, differentiateBy: String): FunctionNode = {
     nodeToDifferentiate.name() match {
-      case "sin" => {
-        val children = for (child <- nodeToDifferentiate.children()) yield differentiate(child, differentiateBy)
-        node("mul", List(node("cos", nodeToDifferentiate.children())) ++ children)
-      }
-      case `differentiateBy` => node("1.0", List())
-      case AnyVariable() => node("0.0", List())
+      case "sin" =>
+        node(
+          "mul",
+          List(node("cos", nodeToDifferentiate.children()))
+            ++
+            differentiate(nodeToDifferentiate.children(), differentiateBy))
+
+      case "cos" =>
+        node(
+          "mul",
+          List(node("-1.0"))
+            ++
+            List(node("sin", nodeToDifferentiate.children()))
+            ++
+            differentiate(nodeToDifferentiate.children(), differentiateBy))
+
+      case `differentiateBy` => node("1.0")
+      case AnyVariable() => constant_0
+      case AnyConstant(_) => constant_0
     }
+  }
+
+  private def differentiate(nodesToDifferentiate: Seq[FunctionNode], differentiateBy: String): Seq[FunctionNode] = {
+    for (child <- nodesToDifferentiate) yield differentiate(child, differentiateBy)
+  }
+
+  private def node(functionName: String): FunctionNode = {
+    node(functionName, List())
   }
 
   private def node(functionName: String, children: Seq[FunctionNode]): FunctionNode = {

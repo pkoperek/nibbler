@@ -9,13 +9,38 @@ class Function(functionTree: FunctionNode) {
   }
 
   def differentiate(differentiateBy: String): Function = {
-    null
+    new Function(SymbolicDifferentiation.differentiate(functionTree, differentiateBy))
+  }
+
+  override def toString(): String = {
+    "Function[" + functionTree.toString + "]"
   }
 
 }
 
-object BasicFunctions {
-  private val VariablePattern = "var_(\\d+)".r
+private object SymbolicDifferentiation {
+
+  private val AnyVariable = "var_\\d+".r
+
+  def differentiate(nodeToDifferentiate: FunctionNode, differentiateBy: String): FunctionNode = {
+    nodeToDifferentiate.name() match {
+      case "sin" => {
+        val children = for (child <- nodeToDifferentiate.children()) yield differentiate(child, differentiateBy)
+        node("mul", List(node("cos", nodeToDifferentiate.children())) ++ children)
+      }
+      case `differentiateBy` => node("1.0", List())
+      case AnyVariable() => node("0.0", List())
+    }
+  }
+
+  private def node(functionName: String, children: Seq[FunctionNode]): FunctionNode = {
+    new FunctionNode(functionName, children)
+  }
+}
+
+private object BasicFunctions {
+
+  private val Variable = "var_(\\d+)".r
 
   private def plus(inputValues: Seq[Double]): Double = {
     var result = 0.0
@@ -67,23 +92,31 @@ object BasicFunctions {
       case "cos" => wrap(math.cos)
       case "tan" => wrap(math.tan)
       case "exp" => wrap(math.exp)
-      case VariablePattern(variableIndex) => seqSelector(variableIndex.toInt)
+      case Variable(variableIndex) => seqSelector(variableIndex.toInt)
       case constant => ignoredInput => constant.toDouble
     }
   }
 
 }
 
-class FunctionNode(functionName: String, children: Seq[FunctionNode]) {
+class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) {
 
   val function: Seq[Double] => Double = BasicFunctions.resolveFunction(functionName)
 
-  def name() = {
+  def name(): String = {
     this.functionName
   }
 
+  def children(): Seq[FunctionNode] = {
+    childrenFunctions
+  }
+
+  override def toString(): String = {
+    "Node(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
+  }
+
   def evaluate(inputRow: Seq[Double]): Double = {
-    if (children.size > 0) {
+    if (childrenFunctions.size > 0) {
       processNonLeaf(inputRow)
     } else {
       processLeaf(inputRow)
@@ -96,7 +129,7 @@ class FunctionNode(functionName: String, children: Seq[FunctionNode]) {
 
   private def processNonLeaf(inputRow: Seq[Double]): Double = {
     val childrenEvaluated = ListBuffer[Double]()
-    for (child <- children) {
+    for (child <- childrenFunctions) {
       childrenEvaluated += child.evaluate(inputRow)
     }
 

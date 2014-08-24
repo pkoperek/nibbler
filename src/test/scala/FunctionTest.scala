@@ -236,26 +236,50 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     storedFunctionName should equal(functionName)
   }
 
-  test("differentiaties symbolically sin") {
+  test("FunctionNode stores children") {
     // Given
-    val function = new Function(new FunctionNode("sin", List(new FunctionNode("x", List()))))
+    val childFunction = new FunctionNode("cos", List())
+    val function = new FunctionNode("sin", List(childFunction))
 
     // When
-    val differentiated = function.differentiate("x")
+    val children: Seq[FunctionNode] = function.children()
 
     // Then
-    differentiated.evaluate(List(1.0)) should equal(Math.sin(1.0) plusOrMinus 0.0001)
+    children should contain(childFunction)
   }
 
-  test("differentiaties by non existing variable returns the same function") {
+  test("differentiates symbolically sin") {
     // Given
-    val function = new Function(new FunctionNode("sin", List(new FunctionNode("x", List()))))
+    val function = new Function(new FunctionNode("sin", List(new FunctionNode("var_0", List()))))
 
     // When
-    val differentiated = function.differentiate("x")
+    val differentiated = function.differentiate("var_0")
 
     // Then
-    differentiated.evaluate(List(1.0)) should equal(function.evaluate(List(1.0)) plusOrMinus 0.0001)
+
+    println("Before:")
+    println(function)
+    println("After:")
+    println(differentiated)
+
+    differentiated.evaluate(List(1.0)) should be(Math.cos(1.0) plusOrMinus 0.0001)
+  }
+
+  test("differentiates by non existing variable should return 0") {
+    // Given
+    val function = new Function(new FunctionNode("sin", List(new FunctionNode("var_0", List()))))
+
+    // When
+    val differentiated = function.differentiate("var_999")
+
+    // Then
+
+    println("Before:")
+    println(function)
+    println("After:")
+    println(differentiated)
+
+    differentiated.evaluate(List(1.0)) should equal(0.0)
   }
 
   private def evaluateJsonWithParams(jsonText: String): Double = {

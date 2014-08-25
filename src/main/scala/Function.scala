@@ -71,7 +71,23 @@ private object SymbolicDifferentiation {
       case "exp" =>
         node(
           "mul",
-          List(nodeToDifferentiate) ++ differentiateEach(nodeToDifferentiate.children(), differentiateBy)
+          List(nodeToDifferentiate) ++ differentiateEach(children, differentiateBy)
+        )
+
+      case "div" =>
+        val differentiatedChildren = differentiateEach(children, differentiateBy)
+        node(
+          "div",
+          List(
+            node("minus",
+              List(
+                node("mul", List(children(1), differentiatedChildren(0))),
+                node("mul", List(children(0), differentiatedChildren(1)))
+              )
+            )
+          )
+            ++
+            List(node("mul", List(children(1), children(1))))
         )
 
       case "plus" =>

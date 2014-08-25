@@ -265,7 +265,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val functionTree = constant("123.0")
 
     // When
-    val differentiated = new Function(functionTree).differentiate("var_0")
+    val differentiated = function(functionTree).differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(1.0)) should be(0.0)
@@ -277,7 +277,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val functionTree = constant("333.")
 
     // When
-    val differentiated = new Function(functionTree).differentiate("var_0")
+    val differentiated = function(functionTree).differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(1.0)) should be(0.0)
@@ -286,7 +286,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically sin") {
     // When
-    val differentiated = functionWithVariable("sin").differentiate("var_0")
+    val differentiated = function(sin(var_0)).differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(1.0)) should be(Math.cos(1.0) plusOrMinus 0.0001)
@@ -294,7 +294,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically cos") {
     // When
-    val differentiated = functionWithVariable("cos").differentiate("var_0")
+    val differentiated = function(cos(var_0)).differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(1.0)) should be(-Math.sin(1.0) plusOrMinus 0.0001)
@@ -302,7 +302,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically plus") {
     // Given
-    val toDifferentiate: Function = new Function(node("plus", List(nodeWithVariable("sin"), constant("10"))))
+    val toDifferentiate: Function = function(plus(sin(var_0), constant("10")))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -313,7 +313,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically minus") {
     // Given
-    val toDifferentiate: Function = new Function(node("minus", List(constant("10"), nodeWithVariable("sin"))))
+    val toDifferentiate: Function = function(minus(constant("10"), sin(var_0)))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -324,7 +324,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates by non existing variable should return 0") {
     // When
-    val differentiated = functionWithVariable("sin").differentiate("var_999")
+    val differentiated = function(sin(var_0)).differentiate("var_999")
 
     // Then
     differentiated.evaluate(List(1.0)) should equal(0.0)
@@ -332,7 +332,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically mul of two constants") {
     // Given
-    val toDifferentiate = function(node("mul", List(constant("2.0"), constant("3.0"))))
+    val toDifferentiate = function(mul(constant("2.0"), constant("3.0")))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -343,7 +343,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically mul of constant and a variable") {
     // Given
-    val toDifferentiate = function(node("mul", List(constant("2.0"), variable("var_0"))))
+    val toDifferentiate = function(mul(constant("2.0"), variable("var_0")))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -354,7 +354,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically mul a product of three") {
     // Given
-    val toDifferentiate = function(node("mul", List(constant("2.0"), variable("var_0"), variable("var_1"))))
+    val toDifferentiate = function(mul(constant("2.0"), variable("var_0"), variable("var_1")))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -365,7 +365,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates exp(var_0)") {
     // Given
-    val toDifferentiate = function(nodeWithVariable("exp"))
+    val toDifferentiate = function(exp(var_0))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -376,13 +376,77 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates exp(2*var_0)") {
     // Given
-    val toDifferentiate = function(node("exp", node("mul", List(constant("2.0"), node("var_0")))))
+    val toDifferentiate = function(exp(mul(constant("2.0"), var_0)))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(3.0)) should be(2.0 * Math.exp(2.0 * 3.0) plusOrMinus 0.00001)
+  }
+
+  test("differentiates 1/var_0") {
+    // Given
+    val toDifferentiate = function(div(constant("1.0"), var_0))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(5.0)) should be(-1 / (5.0 * 5.0) plusOrMinus 0.00001)
+  }
+
+  test("differentiates 1-2*var_0/var_0") {
+    // Given
+    val toDifferentiate = function(
+      div(
+        minus(
+          constant("1.0"),
+          mul(
+            constant("2.0"),
+            var_0)
+        ),
+        var_0
+      )
+    )
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(5.0)) should be(-1 / (5.0 * 5.0) plusOrMinus 0.00001)
+  }
+
+  private def mul(operands: FunctionNode*) = {
+    node("mul", operands.toList)
+  }
+
+  private def minus(operandLeft: FunctionNode, operandRight: FunctionNode) = {
+    node("minus", List(operandLeft, operandRight))
+  }
+
+  private def plus(operandLeft: FunctionNode, operandRight: FunctionNode) = {
+    node("plus", List(operandLeft, operandRight))
+  }
+
+  private def div(operandLeft: FunctionNode, operandRight: FunctionNode) = {
+    node("div", List(operandLeft, operandRight))
+  }
+
+  private def exp(operand: FunctionNode) = {
+    node("exp", operand)
+  }
+
+  private def sin(operand: FunctionNode) = {
+    node("sin", operand)
+  }
+
+  private def cos(operand: FunctionNode) = {
+    node("cos", operand)
+  }
+
+  private def var_0 = {
+    node("var_0")
   }
 
   private def evaluateJsonWithParams(jsonText: String): Double = {
@@ -393,10 +457,6 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   private def variable(name: String) = {
     new FunctionNode(name, List())
-  }
-
-  private def functionWithVariable(name: String): Function = {
-    function(nodeWithVariable(name))
   }
 
   private def function(tree: FunctionNode) = {
@@ -413,10 +473,6 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   private def node(name: String) = {
     new FunctionNode(name, List())
-  }
-
-  private def nodeWithVariable(name: String): FunctionNode = {
-    node(name, node("var_0"))
   }
 
   private def constant(constantValue: String): FunctionNode = {

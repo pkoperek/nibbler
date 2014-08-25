@@ -12,7 +12,7 @@ class Function(functionTree: FunctionNode) {
     new Function(SymbolicDifferentiation.differentiate(functionTree, differentiateBy))
   }
 
-  override def toString(): String = {
+  override def toString: String = {
     "Function[" + functionTree.toString + "]"
   }
 
@@ -68,6 +68,7 @@ private object SymbolicDifferentiation {
           productsWithSingleElementsDifferentiated
         )
       }
+
       case "plus" =>
         node("plus", differentiateEach(children, differentiateBy))
 

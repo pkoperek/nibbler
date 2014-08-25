@@ -53,7 +53,7 @@ private object SymbolicDifferentiation {
             ++
             differentiateEach(children, differentiateBy))
 
-      case "mul" => {
+      case "mul" =>
         val differentiatedChildren = differentiateEach(children, differentiateBy)
         val productsWithSingleElementsDifferentiated: Seq[FunctionNode] =
           for (childIndex <- 0 to differentiatedChildren.size - 1)
@@ -67,7 +67,6 @@ private object SymbolicDifferentiation {
           "plus",
           productsWithSingleElementsDifferentiated
         )
-      }
 
       case "plus" =>
         node("plus", differentiateEach(children, differentiateBy))
@@ -167,7 +166,7 @@ class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) {
     childrenFunctions
   }
 
-  override def toString(): String = {
+  override def toString: String = {
     "Node(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
   }
 

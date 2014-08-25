@@ -8,20 +8,18 @@ mainClassName = 'org.eclipse.jetty.runner.Runner'
 
 configurations {
     container // group for jetty container used to run webapp from ./gradlew jettyRun
- 
-   // need to exclude this because there is a clash between spark's version of akka
-   // and akka coming from scalatest
-   testRuntime.exclude group: "com.typesafe.akka", module:"akka-actor_2.10"
+
+    // need to exclude this because there is a clash between spark's version of akka
+    // and akka coming from scalatest
+    testRuntime.exclude group: "com.typesafe.akka", module: "akka-actor_2.10"
 }
 
-repositories
-{
+repositories {
     mavenCentral()
 
     maven {
         url "http://repo.spray.io/"
     }
-
 }
 
 dependencies {
@@ -46,7 +44,7 @@ dependencies {
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'
 
     // spark 
-    compile ('org.apache.spark:spark-core_2.10:1.0.0')
+    compile('org.apache.spark:spark-core_2.10:1.0.0')
 
     // hadoop-client
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.2.0'

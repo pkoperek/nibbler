@@ -22,3 +22,8 @@ POST /evaluate
 "inputFile": "hdfs://master/tmp/test1.txt"
 }
 ```
+
+Parameters:
+===========
+
+  * `--local` - runs spark in "local" mode (with master URI set to `local`)

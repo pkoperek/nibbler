@@ -68,6 +68,12 @@ private object SymbolicDifferentiation {
           productsWithSingleElementsDifferentiated
         )
 
+      case "exp" =>
+        node(
+          "mul",
+          List(nodeToDifferentiate) ++ differentiateEach(nodeToDifferentiate.children(), differentiateBy)
+        )
+
       case "plus" =>
         node("plus", differentiateEach(children, differentiateBy))
 

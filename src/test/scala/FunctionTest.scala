@@ -363,6 +363,28 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     differentiated.evaluate(List(1000.0, 4.0)) should equal(8.0)
   }
 
+  test("differentiates exp(var_0)") {
+    // Given
+    val toDifferentiate = function(nodeWithVariable("exp"))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(2.0)) should be(Math.exp(2.0) plusOrMinus 0.00001)
+  }
+
+  test("differentiates exp(2*var_0)") {
+    // Given
+    val toDifferentiate = function(node("exp", node("mul", List(constant("2.0"), node("var_0")))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(3.0)) should be(2.0 * Math.exp(2.0 * 3.0) plusOrMinus 0.00001)
+  }
+
   private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)

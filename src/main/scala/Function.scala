@@ -21,7 +21,7 @@ class Function(functionTree: FunctionNode) {
 private object SymbolicDifferentiation {
 
   private val AnyVariable = "var_\\d+".r
-  private val constant_0: FunctionNode = node("0.0", List())
+  private val constant_0 = node("0.0", List())
 
   private object AnyConstant {
     def unapply(candidate: String): Option[Double] = {
@@ -38,65 +38,51 @@ private object SymbolicDifferentiation {
 
     nodeToDifferentiate.name() match {
       case "sin" =>
-        node(
-          "mul",
-          List(node("cos", children))
-            ++
-            differentiateEach(children, differentiateBy))
+        mul(
+          List(cos(children: _*)) ++ differentiateEach(children, differentiateBy): _*
+        )
 
       case "cos" =>
-        node(
-          "mul",
-          List(node("-1.0"))
+        mul(
+          List(constant("-1.0"))
             ++
-            List(node("sin", children))
+            List(sin(children: _*))
             ++
-            differentiateEach(children, differentiateBy))
+            differentiateEach(children, differentiateBy): _*)
 
       case "mul" =>
         val differentiatedChildren = differentiateEach(children, differentiateBy)
         val productsWithSingleElementsDifferentiated: Seq[FunctionNode] =
           for (childIndex <- 0 to differentiatedChildren.size - 1)
           yield
-            node(
-              "mul",
-              children.take(childIndex) ++ List(differentiatedChildren(childIndex)) ++ children.drop(childIndex + 1)
+            mul(
+              children.take(childIndex) ++ List(differentiatedChildren(childIndex)) ++ children.drop(childIndex + 1): _*
             )
 
-        node(
-          "plus",
-          productsWithSingleElementsDifferentiated
-        )
+        plus(productsWithSingleElementsDifferentiated: _*)
 
       case "exp" =>
-        node(
-          "mul",
-          List(nodeToDifferentiate) ++ differentiateEach(children, differentiateBy)
+        mul(
+          List(nodeToDifferentiate) ++ differentiateEach(children, differentiateBy): _*
         )
 
       case "div" =>
         val differentiatedChildren = differentiateEach(children, differentiateBy)
-        node(
-          "div",
-          List(
-            node("minus",
-              List(
-                node("mul", List(children(1), differentiatedChildren(0))),
-                node("mul", List(children(0), differentiatedChildren(1)))
-              )
-            )
-          )
-            ++
-            List(node("mul", List(children(1), children(1))))
+        div(
+          minus(
+            mul(children(1), differentiatedChildren(0)),
+            mul(children(0), differentiatedChildren(1))
+          ),
+          mul(children(1), children(1))
         )
 
       case "plus" =>
-        node("plus", differentiateEach(children, differentiateBy))
+        plus(differentiateEach(children, differentiateBy): _*)
 
       case "minus" =>
-        node("minus", differentiateEach(children, differentiateBy))
+        minus(differentiateEach(children, differentiateBy): _*)
 
-      case `differentiateBy` => node("1.0")
+      case `differentiateBy` => constant("1.0")
       case AnyVariable() => constant_0
       case AnyConstant(_) => constant_0
     }
@@ -104,6 +90,34 @@ private object SymbolicDifferentiation {
 
   private def differentiateEach(nodesToDifferentiate: Seq[FunctionNode], differentiateBy: String): Seq[FunctionNode] = {
     for (child <- nodesToDifferentiate) yield differentiate(child, differentiateBy)
+  }
+
+  private def mul(operands: FunctionNode*) = {
+    node("mul", operands.toList)
+  }
+
+  private def minus(operands: FunctionNode*) = {
+    node("minus", operands.toList)
+  }
+
+  private def plus(operands: FunctionNode*) = {
+    node("plus", operands.toList)
+  }
+
+  private def div(operandLeft: FunctionNode, operandRight: FunctionNode) = {
+    node("div", List(operandLeft, operandRight))
+  }
+
+  private def sin(operands: FunctionNode*) = {
+    node("sin", operands.toList)
+  }
+
+  private def cos(operands: FunctionNode*) = {
+    node("cos", operands.toList)
+  }
+
+  private def constant(value: String) = {
+    node(value)
   }
 
   private def node(functionName: String): FunctionNode = {

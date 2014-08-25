@@ -6,7 +6,8 @@ class SparkContextService(nibblerJarRealPath: String) {
   private val defaultMasterUri = "mesos://zk://master:2181/mesos"
 
   def createSparkContext(appName: String): SparkContext = {
-    createSparkContext(appName, "")
+    val masterUri = System.getProperty("nibbler.master.uri", defaultMasterUri)
+    createSparkContext(appName, masterUri)
   }
 
   def createSparkContext(appName: String, masterUri: String): SparkContext = {

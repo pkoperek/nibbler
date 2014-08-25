@@ -230,7 +230,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val functionName = "sin"
 
     // When
-    val storedFunctionName = new FunctionNode(functionName, List()).name()
+    val storedFunctionName = node(functionName).name()
 
     // Then
     storedFunctionName should equal(functionName)
@@ -302,7 +302,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically plus") {
     // Given
-    val toDifferentiate: Function = new Function(new FunctionNode("plus", List(nodeWithVariable("sin"), constant("10"))))
+    val toDifferentiate: Function = new Function(node("plus", List(nodeWithVariable("sin"), constant("10"))))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -313,7 +313,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically minus") {
     // Given
-    val toDifferentiate: Function = new Function(new FunctionNode("minus", List(constant("10"), nodeWithVariable("sin"))))
+    val toDifferentiate: Function = new Function(node("minus", List(constant("10"), nodeWithVariable("sin"))))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -330,21 +330,74 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     differentiated.evaluate(List(1.0)) should equal(0.0)
   }
 
+  test("differentiates symbolically mul of two constants") {
+    // Given
+    val toDifferentiate = function(node("mul", List(constant("2.0"), constant("3.0"))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List()) should equal(0.0)
+  }
+
+  test("differentiates symbolically mul of constant and a variable") {
+    // Given
+    val toDifferentiate = function(node("mul", List(constant("2.0"), variable("var_0"))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(123.0)) should equal(2.0)
+  }
+
+  test("differentiates symbolically mul a product of three") {
+    // Given
+    val toDifferentiate = function(node("mul", List(constant("2.0"), variable("var_0"), variable("var_1"))))
+
+    // When
+    val differentiated = toDifferentiate.differentiate("var_0")
+
+    // Then
+    differentiated.evaluate(List(1000.0, 4.0)) should equal(8.0)
+  }
+
   private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
     val function = Function.buildFunction(json.asJsObject)
     function.evaluate(List())
   }
 
+  private def variable(name: String) = {
+    new FunctionNode(name, List())
+  }
+
   private def functionWithVariable(name: String): Function = {
-    new Function(nodeWithVariable(name))
+    function(nodeWithVariable(name))
+  }
+
+  private def function(tree: FunctionNode) = {
+    new Function(tree)
+  }
+
+  private def node(name: String, child: FunctionNode) = {
+    new FunctionNode(name, List(child))
+  }
+
+  private def node(name: String, children: Seq[FunctionNode]) = {
+    new FunctionNode(name, children)
+  }
+
+  private def node(name: String) = {
+    new FunctionNode(name, List())
   }
 
   private def nodeWithVariable(name: String): FunctionNode = {
-    new FunctionNode(name, List(new FunctionNode("var_0", List())))
+    node(name, node("var_0"))
   }
 
   private def constant(constantValue: String): FunctionNode = {
-    new FunctionNode(constantValue, List())
+    node(constantValue)
   }
 }

@@ -34,28 +34,45 @@ private object SymbolicDifferentiation {
   }
 
   def differentiate(nodeToDifferentiate: FunctionNode, differentiateBy: String): FunctionNode = {
+    val children: Seq[FunctionNode] = nodeToDifferentiate.children()
+
     nodeToDifferentiate.name() match {
       case "sin" =>
         node(
           "mul",
-          List(node("cos", nodeToDifferentiate.children()))
+          List(node("cos", children))
             ++
-            differentiate(nodeToDifferentiate.children(), differentiateBy))
+            differentiateEach(children, differentiateBy))
 
       case "cos" =>
         node(
           "mul",
           List(node("-1.0"))
             ++
-            List(node("sin", nodeToDifferentiate.children()))
+            List(node("sin", children))
             ++
-            differentiate(nodeToDifferentiate.children(), differentiateBy))
+            differentiateEach(children, differentiateBy))
 
+      case "mul" => {
+        val differentiatedChildren = differentiateEach(children, differentiateBy)
+        val productsWithSingleElementsDifferentiated: Seq[FunctionNode] =
+          for (childIndex <- 0 to differentiatedChildren.size - 1)
+          yield
+            node(
+              "mul",
+              children.take(childIndex) ++ List(differentiatedChildren(childIndex)) ++ children.drop(childIndex + 1)
+            )
+
+        node(
+          "plus",
+          productsWithSingleElementsDifferentiated
+        )
+      }
       case "plus" =>
-        node("plus", differentiate(nodeToDifferentiate.children(), differentiateBy))
+        node("plus", differentiateEach(children, differentiateBy))
 
       case "minus" =>
-        node("minus", differentiate(nodeToDifferentiate.children(), differentiateBy))
+        node("minus", differentiateEach(children, differentiateBy))
 
       case `differentiateBy` => node("1.0")
       case AnyVariable() => constant_0
@@ -63,7 +80,7 @@ private object SymbolicDifferentiation {
     }
   }
 
-  private def differentiate(nodesToDifferentiate: Seq[FunctionNode], differentiateBy: String): Seq[FunctionNode] = {
+  private def differentiateEach(nodesToDifferentiate: Seq[FunctionNode], differentiateBy: String): Seq[FunctionNode] = {
     for (child <- nodesToDifferentiate) yield differentiate(child, differentiateBy)
   }
 

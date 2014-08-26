@@ -9,6 +9,8 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   private val timestampParser = new TimestampParser
   private val pairGenerator = new PairGenerator
 
+  private def reverse(toReverse: (Double, Long)) = toReverse.swap
+
   get("/status") {
     val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
 
@@ -32,13 +34,14 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
       })
 
     val variablePairs = pairGenerator.generatePairs(2)
+    val results = new StringBuilder
 
     for (pair <- variablePairs) {
       val df_dx = functionDeserializeed.differentiate("var_" + pair._1)
       val df_dy = functionDeserializeed.differentiate("var_" + pair._2)
 
-      val df_dx_evaluated = input.map(df_dx.evaluate(_)).zipWithIndex()
-      val df_dy_evaluated = input.map(df_dy.evaluate(_)).zipWithIndex()
+      val df_dx_evaluated = input.map(df_dx.evaluate(_)).zipWithIndex().map(reverse)
+      val df_dy_evaluated = input.map(df_dy.evaluate(_)).zipWithIndex().map(reverse)
 
       val differentiatorType: String = toString(requestAsJson.getFields("numdiff"))
       val differentiator = NumericalDifferentiator(
@@ -46,8 +49,19 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
         pair._1,
         pair._2)
 
-      val numericallyDifferentiated = differentiator.partialDerivative(input)
+      val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse)
+
+      val result: String = "Results: " +
+        " dfdx cnt: " + df_dx_evaluated.count() +
+        " dfdy cnt: " + df_dy_evaluated.count() +
+        " numdiff cnt: " + numericallyDifferentiated.count()
+
+      println("Partial result: " + result)
+
+      results.append(result)
     }
+
+    results.toString()
   }
 
   def toString(fields: Seq[JsValue]): String = {

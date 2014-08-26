@@ -5,15 +5,21 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
+import org.scalatra.test.scalatest.ScalatraSuite
 
 @RunWith(classOf[JUnitRunner])
-class NibblerServletTest extends FunSuite with MockitoSugar with ShouldMatchers {
+class NibblerServletTest extends ScalatraSuite with FunSuite with MockitoSugar {
+
+  private val configuration = new SparkConf().setAppName("test").setMaster("local")
+  private val sparkContext = new SparkContext(configuration)
+
+  addServlet(new NibblerServlet(sparkContext), "/*")
 
   test("should return status") {
-    // Given
-    val expectedOutput = (1 to 9).mkString(",")
-
-
+    get("/status") {
+      status should equal(200)
+      body should include((1 to 9).mkString(","))
+    }
   }
 
 }

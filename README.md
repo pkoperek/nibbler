@@ -19,7 +19,14 @@ Test query:
 ```
 POST /evaluate
 {
-"inputFile": "hdfs://master/tmp/test1.txt"
+  "numdiff": "backward",
+  "inputFile": "/tmp/input.csv",
+  "function": 	{
+    "function": "sin",
+    "operands": [{
+      "function": "var_0"
+    }]
+  }
 }
 ```
 

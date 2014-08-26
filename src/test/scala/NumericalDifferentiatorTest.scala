@@ -1,13 +1,24 @@
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar {
+class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar with BeforeAndAfterEach {
+
+  private val configuration = new SparkConf().setAppName("test").setMaster("local")
+  private var sparkContext:SparkContext = null
+
+  override protected def beforeEach(): Unit = {
+    sparkContext = new SparkContext(configuration)
+  }
+
+  override protected def afterEach(): Unit = {
+    sparkContext.stop()
+  }
 
   test("accepts 'backward' as differentiator strategy") {
     try {
@@ -34,8 +45,6 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
   test("validates input data set has at least two variables") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
-    val configuration = new SparkConf().setAppName("test").setMaster("local")
-    val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 20.0)))
 
     // Then
@@ -49,8 +58,6 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
   test("accepts data set with two variables") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
-    val configuration = new SparkConf().setAppName("test").setMaster("local")
-    val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0)))
 
     // Then
@@ -62,8 +69,6 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
   test("backward: differentiates the rdd according to formula") {
     // Given
     val differentiator = NumericalDifferentiator("backward", 0, 1)
-    val configuration = new SparkConf().setAppName("test").setMaster("local")
-    val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(20.0, 3.0)))
 
     // When
@@ -76,8 +81,6 @@ class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with Mock
   test("central: differentiates the rdd according to formula") {
     // Given
     val differentiator = NumericalDifferentiator("central", 0, 1)
-    val configuration = new SparkConf().setAppName("test").setMaster("local")
-    val sparkContext = new SparkContext(configuration)
     val input: RDD[Seq[Double]] = sparkContext.parallelize(List(List(10.0, 1.0), List(100.0, 100.0), List(20.0, 5.0)))
 
     // When

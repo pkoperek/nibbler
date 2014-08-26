@@ -6,7 +6,8 @@ import spray.json._
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
-  val timestampParser = new TimestampParser
+  private val timestampParser = new TimestampParser
+  private val pairGenerator = new PairGenerator
 
   get("/status") {
     val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
@@ -22,6 +23,7 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
     val function = requestAsJson.getFields("function")(0)
     val functionDeserializeed = Function.buildFunction(function.asJsObject)
+
     val input: RDD[Seq[Double]] = inputAsText.map(
       (row: String) => {
         val splitted = row.split(",")
@@ -29,14 +31,23 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
         List(timestamp.toDouble) ++ splitted.splitAt(1)._2.map(_.toDouble).toList
       })
 
-    val symbolicallyDifferentiated = input.map(functionDeserializeed.evaluate(_))
+    val variablePairs = pairGenerator.generatePairs(2)
 
-    val differentiator = NumericalDifferentiator(
-      toString(requestAsJson.getFields("numdiff")),
-      0,
-      1)
-    val numericallyDifferentiated = differentiator.partialDerivative(input)
+    for (pair <- variablePairs) {
+      val df_dx = functionDeserializeed.differentiate("var_" + pair._1)
+      val df_dy = functionDeserializeed.differentiate("var_" + pair._2)
 
+      val df_dx_evaluated = input.map(df_dx.evaluate(_)).zipWithIndex()
+      val df_dy_evaluated = input.map(df_dy.evaluate(_)).zipWithIndex()
+
+      val differentiatorType: String = toString(requestAsJson.getFields("numdiff"))
+      val differentiator = NumericalDifferentiator(
+        differentiatorType,
+        pair._1,
+        pair._2)
+
+      val numericallyDifferentiated = differentiator.partialDerivative(input)
+    }
   }
 
   def toString(fields: Seq[JsValue]): String = {

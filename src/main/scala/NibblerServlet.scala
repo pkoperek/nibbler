@@ -89,7 +89,10 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   }
 
   def trimQuotes(toTrim: String): String = {
-    toTrim.trim().dropRight(1).drop(1)
+    if (toTrim.charAt(0).equals('"') && toTrim.last.equals('"')) {
+      toTrim.trim().dropRight(1).drop(1)
+    }
+    toTrim
   }
 
 }

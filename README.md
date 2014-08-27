@@ -34,3 +34,11 @@ Parameters:
 ===========
 
   * `--local` - runs spark in "local" mode (with master URI set to `local`)
+
+Useful scripts:
+===============
+
+* One-liner for rebuilding and starting nibbler
+```
+rm -rf nibbler && ./gradlew distZip && unzip build/distributions/nibbler.zip  && ./nibbler/bin/nibbler --local
+```

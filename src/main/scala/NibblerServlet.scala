@@ -20,11 +20,11 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   post("/evaluate") {
     val requestAsJson = request.body.parseJson.asJsObject
 
-    val inputFile = toString(requestAsJson.getFields("inputFile"))
+    val inputFile = getValue(requestAsJson, "inputFile")
     val inputAsText = sparkContext.textFile(inputFile)
 
-    val function = requestAsJson.getFields("function")(0)
-    val functionDeserializeed = Function.buildFunction(function.asJsObject)
+    val function = getValue(requestAsJson, "function")
+    val functionDeserializeed = Function.buildFunction(function.parseJson.asJsObject)
 
     val input: RDD[Seq[Double]] = inputAsText.map(
       (row: String) => {
@@ -43,7 +43,7 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
       val df_dx_evaluated = input.map(df_dx.evaluate(_)).zipWithIndex().map(reverse)
       val df_dy_evaluated = input.map(df_dy.evaluate(_)).zipWithIndex().map(reverse)
 
-      val differentiatorType: String = toString(requestAsJson.getFields("numdiff"))
+      val differentiatorType: String = getValueOrDefault(requestAsJson, "numdiff", "backward")
       val differentiator = NumericalDifferentiator(
         differentiatorType,
         pair._1,
@@ -64,8 +64,33 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
     results.toString()
   }
 
-  def toString(fields: Seq[JsValue]): String = {
-    fields(0).toString().dropRight(1).drop(1)
+  def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {
+    val fields = jsonObject.getFields(key)
+
+    if (fields.size == 0) {
+      default
+    } else {
+      trimQuotes(fields(0))
+    }
   }
+
+  def getValue(jsonObject: JsObject, key: String): String = {
+    val fields = jsonObject.getFields(key)
+
+    if (fields.size == 0) {
+      throw new IllegalArgumentException("Parameter not specified: " + key)
+    }
+
+    trimQuotes(fields(0))
+  }
+
+  def trimQuotes(toTrim: JsValue): String = {
+    trimQuotes(toTrim.toString())
+  }
+
+  def trimQuotes(toTrim: String): String = {
+    toTrim.trim().dropRight(1).drop(1)
+  }
+
 }
 

@@ -2,7 +2,7 @@ import spray.json.{JsArray, JsObject}
 
 import scala.collection.mutable.ListBuffer
 
-class Function(functionTree: FunctionNode) {
+class Function(functionTree: FunctionNode) extends Serializable {
 
   def evaluate(input: Seq[Double]): Double = {
     functionTree.evaluate(input)
@@ -129,7 +129,7 @@ private object SymbolicDifferentiation {
   }
 }
 
-private object BasicFunctions {
+private object BasicFunctions extends Serializable {
 
   private val Variable = "var_(\\d+)".r
 
@@ -190,7 +190,7 @@ private object BasicFunctions {
 
 }
 
-class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) {
+class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) extends Serializable {
 
   val function: Seq[Double] => Double = BasicFunctions.resolveFunction(functionName)
 

@@ -40,8 +40,8 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
       val df_dx = functionDeserializeed.differentiate("var_" + pair._1)
       val df_dy = functionDeserializeed.differentiate("var_" + pair._2)
 
-      val df_dx_evaluated = input.map(df_dx.evaluate(_)).zipWithIndex().map(reverse)
-      val df_dy_evaluated = input.map(df_dy.evaluate(_)).zipWithIndex().map(reverse)
+      val df_dx_evaluated = input.map(df_dx.evaluate).zipWithIndex().map(reverse)
+      val df_dy_evaluated = input.map(df_dy.evaluate).zipWithIndex().map(reverse)
 
       val differentiatorType: String = getValueOrDefault(requestAsJson, "numdiff", "backward")
       val differentiator = NumericalDifferentiator(

@@ -10,8 +10,9 @@ configurations {
     container // group for jetty container used to run webapp from ./gradlew jettyRun
 
     // need to exclude this because there is a clash between spark's version of akka
-    // and akka coming from scalatest
-    testRuntime.exclude group: "com.typesafe.akka", module: "akka-actor_2.10"
+    // and akka coming from scala (and scalatest)
+    testCompile.exclude group: "com.typesafe.akka", module: "akka-actor_2.10"
+    compile.exclude group: "com.typesafe.akka", module: "akka-actor_2.10"
 }
 
 repositories {
@@ -44,7 +45,7 @@ dependencies {
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'
 
     // spark 
-    compile('org.apache.spark:spark-core_2.10:1.0.0')
+    compile group: 'org.apache.spark', name: 'spark-core_2.10', version: '1.0.0'
 
     // hadoop-client
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.2.0'
@@ -77,7 +78,8 @@ addJarToExplodedWar.dependsOn explodedWar
 task jettyRun(type: JavaExec) {
     main = "org.eclipse.jetty.runner.Runner"
     args = ["$buildDir/exploded"]
-    classpath configurations.container
+    classpath = configurations.container.plus(configurations.testRuntime)
+    jvmArgs += ['-Dnibbler.master.uri=local']
 }
 jettyRun.dependsOn addJarToExplodedWar
 

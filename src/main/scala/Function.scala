@@ -182,7 +182,7 @@ class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) e
   }
 
   override def toString: String = {
-    "Node(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
+    "(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
   }
 
   def evaluate(inputRow: Seq[Double]): Double = {

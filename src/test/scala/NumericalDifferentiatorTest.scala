@@ -7,18 +7,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar with BeforeAndAfterEach {
-
-  private val configuration = new SparkConf().setAppName("test").setMaster("local")
-  private var sparkContext:SparkContext = null
-
-  override protected def beforeEach(): Unit = {
-    sparkContext = new SparkContext(configuration)
-  }
-
-  override protected def afterEach(): Unit = {
-    sparkContext.stop()
-  }
+class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar with SparkContextAware {
 
   test("accepts 'backward' as differentiator strategy") {
     try {

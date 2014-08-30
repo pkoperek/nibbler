@@ -6,10 +6,7 @@ import spray.json._
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
-  private val pairGenerator = new PairGenerator
   private val inputParser = new HistdataInputParser
-
-  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
   get("/status") {
     val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
@@ -21,42 +18,23 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
     val requestAsJson = request.body.parseJson.asJsObject
 
     val inputFile = getValue(requestAsJson, "inputFile")
-    val inputAsText = sparkContext.textFile(inputFile)
+    val input = parse(inputFile)
 
     val function = getValue(requestAsJson, "function")
-    val functionDeserializeed = Function.buildFunction(function.parseJson.asJsObject)
+    val functionDeserializeed = parseFunction(function)
 
-    val input: RDD[Seq[Double]] = inputAsText.map(inputParser.parseLine)
+    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
 
-    val variablePairs = pairGenerator.generatePairs(2)
-    val results = new StringBuilder
+    new FunctionErrorEvaluator(differentiatorType).evaluate(input, functionDeserializeed)
+  }
 
-    for (pair <- variablePairs) {
-      val df_dx = functionDeserializeed.differentiate("var_" + pair._1)
-      val df_dy = functionDeserializeed.differentiate("var_" + pair._2)
+  private def parseFunction(function: String): Function = {
+    Function.buildFunction(function.parseJson.asJsObject)
+  }
 
-      val df_dx_evaluated = input.map(df_dx.evaluate).zipWithIndex().map(reverse)
-      val df_dy_evaluated = input.map(df_dy.evaluate).zipWithIndex().map(reverse)
-
-      val differentiatorType: String = getValueOrDefault(requestAsJson, "numdiff", "backward")
-      val differentiator = NumericalDifferentiator(
-        differentiatorType,
-        pair._1,
-        pair._2)
-
-      val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse)
-
-      val result: String = "Results: " +
-        " dfdx cnt: " + df_dx_evaluated.count() +
-        " dfdy cnt: " + df_dy_evaluated.count() +
-        " numdiff cnt: " + numericallyDifferentiated.count()
-
-      println("Partial result: " + result)
-
-      results.append(result)
-    }
-
-    results.toString()
+  private def parse(inputFilePath: String): RDD[Seq[Double]] = {
+    val inputAsText = sparkContext.textFile(inputFilePath)
+    inputParser.parse(inputAsText)
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {

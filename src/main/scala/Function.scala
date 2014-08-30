@@ -1,8 +1,9 @@
+import com.google.inject.internal.cglib.core.$DefaultNamingPolicy
 import spray.json.{JsArray, JsObject}
 
 import scala.collection.mutable.ListBuffer
 
-class Function(functionTree: FunctionNode) {
+class Function(functionTree: FunctionNode) extends Serializable {
 
   def evaluate(input: Seq[Double]): Double = {
     functionTree.evaluate(input)
@@ -21,7 +22,7 @@ class Function(functionTree: FunctionNode) {
 private object SymbolicDifferentiation {
 
   private val AnyVariable = "var_\\d+".r
-  private val constant_0 = node("0.0", List())
+  private val constant_0 = Function.node("0.0", List())
 
   private object AnyConstant {
     def unapply(candidate: String): Option[Double] = {
@@ -92,44 +93,22 @@ private object SymbolicDifferentiation {
     for (child <- nodesToDifferentiate) yield differentiate(child, differentiateBy)
   }
 
-  private def mul(operands: FunctionNode*) = {
-    node("mul", operands.toList)
-  }
+  private def mul(operands: FunctionNode*) = Function.mul(operands: _*)
 
-  private def minus(operands: FunctionNode*) = {
-    node("minus", operands.toList)
-  }
+  private def minus(operands: FunctionNode*) = Function.minus(operands: _*)
 
-  private def plus(operands: FunctionNode*) = {
-    node("plus", operands.toList)
-  }
+  private def plus(operands: FunctionNode*) = Function.plus(operands: _*)
 
-  private def div(operandLeft: FunctionNode, operandRight: FunctionNode) = {
-    node("div", List(operandLeft, operandRight))
-  }
+  private def div(operandLeft: FunctionNode, operandRight: FunctionNode) = Function.div(operandLeft, operandRight)
 
-  private def sin(operands: FunctionNode*) = {
-    node("sin", operands.toList)
-  }
+  private def sin(operands: FunctionNode*) = Function.sin(operands: _*)
 
-  private def cos(operands: FunctionNode*) = {
-    node("cos", operands.toList)
-  }
+  private def cos(operands: FunctionNode*) = Function.cos(operands: _*)
 
-  private def constant(value: String) = {
-    node(value)
-  }
-
-  private def node(functionName: String): FunctionNode = {
-    node(functionName, List())
-  }
-
-  private def node(functionName: String, children: Seq[FunctionNode]): FunctionNode = {
-    new FunctionNode(functionName, children)
-  }
+  private def constant(value: String) = Function.constant(value)
 }
 
-private object BasicFunctions {
+private object BasicFunctions extends Serializable {
 
   private val Variable = "var_(\\d+)".r
 
@@ -190,7 +169,7 @@ private object BasicFunctions {
 
 }
 
-class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) {
+class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) extends Serializable {
 
   val function: Seq[Double] => Double = BasicFunctions.resolveFunction(functionName)
 
@@ -203,7 +182,7 @@ class FunctionNode(functionName: String, childrenFunctions: Seq[FunctionNode]) {
   }
 
   override def toString: String = {
-    "Node(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
+    "(" + name() + "," + (for (child <- children()) yield child.toString()) + ")"
   }
 
   def evaluate(inputRow: Seq[Double]): Double = {
@@ -244,7 +223,7 @@ object Function {
 
     val functionName = extractFunctionName(inputAsJson)
 
-    new FunctionNode(functionName, childrenAsNodes.toList)
+    node(functionName, childrenAsNodes.toList)
   }
 
   private def stripQuotes(toStrip: String): String = {
@@ -264,4 +243,39 @@ object Function {
       List()
   }
 
+  def mul(operands: FunctionNode*) = {
+    node("mul", operands.toList)
+  }
+
+  def minus(operands: FunctionNode*) = {
+    node("minus", operands.toList)
+  }
+
+  def plus(operands: FunctionNode*) = {
+    node("plus", operands.toList)
+  }
+
+  def div(operandLeft: FunctionNode, operandRight: FunctionNode) = {
+    node("div", List(operandLeft, operandRight))
+  }
+
+  def sin(operands: FunctionNode*) = {
+    node("sin", operands.toList)
+  }
+
+  def cos(operands: FunctionNode*) = {
+    node("cos", operands.toList)
+  }
+
+  def constant(value: String) = {
+    node(value)
+  }
+
+  def node(functionName: String): FunctionNode = {
+    node(functionName, List())
+  }
+
+  def node(functionName: String, children: Seq[FunctionNode]): FunctionNode = {
+    new FunctionNode(functionName, children)
+  }
 }

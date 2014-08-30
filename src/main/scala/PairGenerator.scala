@@ -1,6 +1,6 @@
 import scala.collection.mutable.ListBuffer
 
-class PairGenerator {
+class PairGenerator extends Serializable {
 
   def generatePairs(numberOfElements: Int): Seq[(Int, Int)] = {
     if(numberOfElements >= 2) {

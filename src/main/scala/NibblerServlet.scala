@@ -6,7 +6,7 @@ import spray.json._
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
-  val timestampParser = new TimestampParser
+  private val inputParser = new HistdataInputParser
 
   get("/status") {
     val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
@@ -17,30 +17,57 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   post("/evaluate") {
     val requestAsJson = request.body.parseJson.asJsObject
 
-    val inputFile = toString(requestAsJson.getFields("inputFile"))
-    val inputAsText = sparkContext.textFile(inputFile)
+    val inputFile = getValue(requestAsJson, "inputFile")
+    val input = parse(inputFile)
 
-    val function = requestAsJson.getFields("function")(0)
-    val functionDeserializeed = Function.buildFunction(function.asJsObject)
-    val input: RDD[Seq[Double]] = inputAsText.map(
-      (row: String) => {
-        val splitted = row.split(",")
-        val timestamp: Long = timestampParser.parse(splitted(0))
-        List(timestamp.toDouble) ++ splitted.splitAt(1)._2.map(_.toDouble).toList
-      })
+    val function = getValue(requestAsJson, "function")
+    val functionDeserializeed = parseFunction(function)
 
-    val symbolicallyDifferentiated = input.map(functionDeserializeed.evaluate(_))
+    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
 
-    val differentiator = NumericalDifferentiator(
-      toString(requestAsJson.getFields("numdiff")),
-      0,
-      1)
-    val numericallyDifferentiated = differentiator.partialDerivative(input)
-
+    new FunctionErrorEvaluator(differentiatorType).evaluate(input, functionDeserializeed)
   }
 
-  def toString(fields: Seq[JsValue]): String = {
-    fields(0).toString().dropRight(1).drop(1)
+  private def parseFunction(function: String): Function = {
+    Function.buildFunction(function.parseJson.asJsObject)
   }
+
+  private def parse(inputFilePath: String): RDD[Seq[Double]] = {
+    val inputAsText = sparkContext.textFile(inputFilePath)
+    inputParser.parse(inputAsText)
+  }
+
+  def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {
+    val fields = jsonObject.getFields(key)
+
+    if (fields.size == 0) {
+      default
+    } else {
+      trimQuotes(fields(0))
+    }
+  }
+
+  def getValue(jsonObject: JsObject, key: String): String = {
+    val fields = jsonObject.getFields(key)
+
+    if (fields.size == 0) {
+      throw new IllegalArgumentException("Parameter not specified: " + key)
+    }
+
+    trimQuotes(fields(0))
+  }
+
+  def trimQuotes(toTrim: JsValue): String = {
+    trimQuotes(toTrim.toString())
+  }
+
+  def trimQuotes(toTrim: String): String = {
+    if (toTrim.charAt(0).equals('"') && toTrim.last.equals('"')) {
+      toTrim.trim().dropRight(1).drop(1)
+    } else {
+      toTrim
+    }
+  }
+
 }
 

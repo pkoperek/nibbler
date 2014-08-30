@@ -2,7 +2,7 @@ import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 
-class TimestampParserTest extends FunSuite with MockitoSugar with ShouldMatchers {
+class HistdataTimestampParserTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("should parse timestamp") {
 
@@ -10,7 +10,7 @@ class TimestampParserTest extends FunSuite with MockitoSugar with ShouldMatchers
     val timestampAsString = "20000530 172736000"
 
     // When
-    val parser = new TimestampParser
+    val parser = new HistdataTimestampParser
     val timestamp = parser.parse(timestampAsString)
 
     // Then

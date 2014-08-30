@@ -1,11 +1,18 @@
+import org.apache.spark.rdd.RDD
+
 class HistdataInputParser extends Serializable {
 
-  private val timestampParser = new TimestampParser
+  private val timestampParser = new HistdataTimestampParser
 
-  def parseLine(row: String) = {
+  def parse(textInput: RDD[String]): RDD[Seq[Double]] = {
+    textInput.map(parseLine)
+  }
+
+  private def parseLine(row: String) = {
     val splitted = row.split(",")
     val timestamp: Long = timestampParser.parse(splitted(0))
-    List(timestamp.toDouble) ++ splitted.splitAt(1)._2.map(_.toDouble).toList
+    val numbers = splitted.splitAt(1)._2
+    List(timestamp.toDouble) ++ numbers.map(_.toDouble).toList
   }
 
 }

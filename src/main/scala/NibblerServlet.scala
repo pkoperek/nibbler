@@ -6,8 +6,8 @@ import spray.json._
 
 class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
 
-  private val timestampParser = new TimestampParser
   private val pairGenerator = new PairGenerator
+  private val inputParser = new HistdataInputParser
 
   private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
@@ -26,12 +26,7 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
     val function = getValue(requestAsJson, "function")
     val functionDeserializeed = Function.buildFunction(function.parseJson.asJsObject)
 
-    val input: RDD[Seq[Double]] = inputAsText.map(
-      (row: String) => {
-        val splitted = row.split(",")
-        val timestamp: Long = timestampParser.parse(splitted(0))
-        List(timestamp.toDouble) ++ splitted.splitAt(1)._2.map(_.toDouble).toList
-      })
+    val input: RDD[Seq[Double]] = inputAsText.map(inputParser.parseLine)
 
     val variablePairs = pairGenerator.generatePairs(2)
     val results = new StringBuilder

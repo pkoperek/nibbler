@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 import java.util.{Locale, Date}
 
-class TimestampParser {
+class TimestampParser extends Serializable {
 
   val dateFormat = new SimpleDateFormat("yyyyMMdd HHmmssSSS", Locale.US)
 

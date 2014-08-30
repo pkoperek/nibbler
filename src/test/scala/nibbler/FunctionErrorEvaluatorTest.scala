@@ -1,4 +1,6 @@
-import Function.{plus, node, sin}
+package nibbler
+
+import nibbler.Function.{node, plus, sin}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

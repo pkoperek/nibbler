@@ -1,3 +1,5 @@
+package nibbler
+
 import scala.collection.mutable.ListBuffer
 
 class PairGenerator extends Serializable {

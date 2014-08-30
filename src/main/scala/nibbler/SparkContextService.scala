@@ -1,4 +1,6 @@
-import org.apache.spark.{SparkContext, SparkConf}
+package nibbler
+
+import org.apache.spark.{SparkConf, SparkContext}
 
 class SparkContextService(nibblerJarRealPath: String) {
 

@@ -1,3 +1,5 @@
+package nibbler
+
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.scalatra._

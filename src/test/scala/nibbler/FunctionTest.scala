@@ -1,3 +1,5 @@
+package nibbler
+
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.scalatest.FunSuite

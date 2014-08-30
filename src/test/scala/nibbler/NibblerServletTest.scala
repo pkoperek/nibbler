@@ -1,10 +1,10 @@
-import org.apache.spark.rdd.RDD
+package nibbler
+
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatra.test.scalatest.ScalatraSuite
 
 @RunWith(classOf[JUnitRunner])

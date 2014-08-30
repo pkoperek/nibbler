@@ -1,5 +1,8 @@
-import org.scalatra._
+package nibbler
+
 import javax.servlet.ServletContext
+
+import org.scalatra._
 
 class ScalatraBootstrap extends LifeCycle {
 

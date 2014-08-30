@@ -1,5 +1,7 @@
+package nibbler
+
 import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{Suite, AbstractSuite, BeforeAndAfterEach}
+import org.scalatest.{BeforeAndAfterEach, Suite}
 
 trait SparkContextAware extends BeforeAndAfterEach {
 

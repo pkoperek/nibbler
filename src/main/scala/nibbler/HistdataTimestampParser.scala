@@ -1,5 +1,7 @@
+package nibbler
+
 import java.text.SimpleDateFormat
-import java.util.{Locale, Date}
+import java.util.{Date, Locale}
 
 class HistdataTimestampParser extends Serializable {
 

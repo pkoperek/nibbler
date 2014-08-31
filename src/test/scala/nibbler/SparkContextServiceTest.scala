@@ -119,4 +119,14 @@ class SparkContextServiceTest
     // Then
     dataSetContained should equal(false)
   }
+
+  test("provides raw spark context") {
+    // Given
+
+    // When
+    val retrievedSparkContext = service.getSparkContext
+
+    // Then
+    retrievedSparkContext should equal(sparkContext)
+  }
 }

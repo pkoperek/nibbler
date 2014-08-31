@@ -15,7 +15,7 @@ class NibblerServletTest extends ScalatraSuite with FunSuite with MockitoSugar w
 
   override protected def beforeEach(): Unit = {
     sparkContext = new SparkContext(configuration)
-    addServlet(new NibblerServlet(sparkContext), "/*")
+    addServlet(new NibblerServlet(new SparkContextService(sparkContext)), "/*")
   }
 
   override protected def afterEach(): Unit = {

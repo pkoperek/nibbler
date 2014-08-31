@@ -3,11 +3,14 @@ package nibbler
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
+import scala.collection.immutable.Range.Inclusive
 import scala.collection.mutable
 
 class SparkContextService(sparkContext: SparkContext) {
 
   private val initializedDataSets = mutable.Map[String, RDD[String]]()
+
+  def getSparkContext: SparkContext = sparkContext
 
   def containsDataSet(dataSetPath: String): Boolean = {
     initializedDataSets.contains(dataSetPath)

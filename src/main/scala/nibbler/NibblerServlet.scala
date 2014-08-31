@@ -6,12 +6,12 @@ import org.scalatra._
 import spray.json._
 
 
-class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
+class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 
   private val inputParser = new HistdataInputParser
 
   get("/status") {
-    val filteredValues: Array[Int] = sparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
+    val filteredValues: Array[Int] = sparkContextService.getSparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
 
     "Test query result: " + filteredValues.mkString(",") + "\nParameters used: " + params
   }
@@ -35,7 +35,7 @@ class NibblerServlet(sparkContext: SparkContext) extends ScalatraServlet {
   }
 
   private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    val inputAsText = sparkContext.textFile(inputFilePath)
+    val inputAsText = sparkContextService.retrieveDataSet(inputFilePath)
     inputParser.parse(inputAsText)
   }
 

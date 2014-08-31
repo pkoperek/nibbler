@@ -7,10 +7,32 @@ import scala.collection.mutable
 
 class SparkContextService(sparkContext: SparkContext) {
 
-  private val initializedDataSets = mutable.Map()
+  private val initializedDataSets = mutable.Map[String, RDD[String]]()
 
-  def registerDataSet(inputPath: String): RDD[String] = {
-    sparkContext.textFile(inputPath)
+  def containsDataSet(dataSetPath: String): Boolean = {
+    initializedDataSets.contains(dataSetPath)
+  }
+
+  def unregisterDataSet(dataSetPath: String) = {
+    initializedDataSets.remove(dataSetPath)
+  }
+
+  def retrieveDataSet(dataSetPath: String): RDD[String] = {
+    val dataSet = initializedDataSets.get(dataSetPath)
+
+    if (dataSet.isEmpty) {
+      throw new IllegalArgumentException("Requested not registered dataset!")
+    }
+
+    dataSet.get
+  }
+
+  def registerDataSet(dataSetPath: String) = {
+    initializedDataSets.synchronized {
+      initializedDataSets.getOrElseUpdate(dataSetPath, {
+        sparkContext.textFile(dataSetPath)
+      })
+    }
   }
 
 }

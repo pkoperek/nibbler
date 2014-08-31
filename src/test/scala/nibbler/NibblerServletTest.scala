@@ -1,5 +1,7 @@
 package nibbler
 
+import java.io.File
+
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -15,11 +17,29 @@ class NibblerServletTest extends ScalatraSuite with FunSuite with MockitoSugar w
 
   override protected def beforeEach(): Unit = {
     sparkContext = new SparkContext(configuration)
-    addServlet(new NibblerServlet(sparkContext), "/*")
+    addServlet(new NibblerServlet(new SparkContextService(sparkContext)), "/*")
   }
 
   override protected def afterEach(): Unit = {
     sparkContext.stop()
+  }
+
+  test("should fail registering not existing data set") {
+    post("/register", body = "{ \"inputFile\": \"iDontExist\" }") {
+      status should equal(500)
+    }
+  }
+
+  test("data set registration completes") {
+    val dataSetFile = File.createTempFile("nibbler", "suffix")
+    dataSetFile.deleteOnExit()
+
+    val requestBody = "{ \"inputFile\": \"" + dataSetFile.getAbsolutePath + "\" }"
+
+    post("/register", body = requestBody.getBytes) {
+      status should equal(200)
+      body should (include("numberOfRows") and include("numberOfColumns") and include("0"))
+    }
   }
 
   test("should return status") {

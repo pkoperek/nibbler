@@ -1,9 +1,11 @@
 package nibbler
 
+import nibbler.FunctionBuilder._
+
 private object SymbolicDifferentiation {
 
   private val AnyVariable = "var_\\d+".r
-  private val constant_0 = Function.node("0.0", List())
+  private val constant_0 = node("0.0", List())
 
   private object AnyConstant {
     def unapply(candidate: String): Option[Double] = {
@@ -73,18 +75,4 @@ private object SymbolicDifferentiation {
   private def differentiateEach(nodesToDifferentiate: Seq[FunctionNode], differentiateBy: String): Seq[FunctionNode] = {
     for (child <- nodesToDifferentiate) yield differentiate(child, differentiateBy)
   }
-
-  private def mul(operands: FunctionNode*) = Function.mul(operands: _*)
-
-  private def minus(operands: FunctionNode*) = Function.minus(operands: _*)
-
-  private def plus(operands: FunctionNode*) = Function.plus(operands: _*)
-
-  private def div(operandLeft: FunctionNode, operandRight: FunctionNode) = Function.div(operandLeft, operandRight)
-
-  private def sin(operands: FunctionNode*) = Function.sin(operands: _*)
-
-  private def cos(operands: FunctionNode*) = Function.cos(operands: _*)
-
-  private def constant(value: String) = Function.constant(value)
 }

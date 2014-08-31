@@ -40,7 +40,7 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
   }
 
   private def parseFunction(function: String): Function = {
-    Function.buildFunction(function.parseJson.asJsObject)
+    FunctionBuilder.buildFunction(function.parseJson.asJsObject)
   }
 
   private def parse(inputFilePath: String): RDD[Seq[Double]] = {

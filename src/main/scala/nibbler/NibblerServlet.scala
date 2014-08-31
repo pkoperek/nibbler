@@ -21,12 +21,8 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
     val requestAsJson = request.body.parseJson.asJsObject
     val inputFilePath = getValue(requestAsJson, "inputFile")
 
-    if (new File(inputFilePath).exists()) {
-      val dataSet = sparkContextService.registerDataSet(inputFilePath)
-      dataSet.toJson
-    } else {
-      throw new FileNotFoundException(inputFilePath)
-    }
+    val dataSet = sparkContextService.registerDataSet(inputFilePath)
+    dataSet.toJson
   }
 
   post("/evaluate") {

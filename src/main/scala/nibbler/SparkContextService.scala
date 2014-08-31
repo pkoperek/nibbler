@@ -8,12 +8,12 @@ import scala.collection.mutable
 
 class SparkContextService(sparkContext: SparkContext) {
 
-  private val initializedDataSets = mutable.Map[String, RDD[String]]()
+  private val initializedDataSets = mutable.Map[String, DataSet]()
 
-  def getDataSetOrRegister(dataSetPath: String): RDD[String] = {
+  def getDataSetOrRegister(dataSetPath: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
 
-    if(dataSet.isEmpty) {
+    if (dataSet.isEmpty) {
       registerDataSet(dataSetPath)
     } else {
       dataSet.get
@@ -30,14 +30,23 @@ class SparkContextService(sparkContext: SparkContext) {
     initializedDataSets.remove(dataSetPath)
   }
 
-  def getDataSet(dataSetPath: String): Option[RDD[String]] = {
+  def getDataSet(dataSetPath: String): Option[DataSet] = {
     initializedDataSets.get(dataSetPath)
   }
 
-  def registerDataSet(dataSetPath: String): RDD[String] = {
+  def registerDataSet(dataSetPath: String): DataSet = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
-        sparkContext.textFile(dataSetPath)
+        val rdd = sparkContext.textFile(dataSetPath)
+
+        val rowsCount = rdd.count()
+        val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
+
+        new DataSet(
+          rowsCount,
+          columnsCount,
+          rdd
+        )
       })
     }
   }

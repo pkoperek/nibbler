@@ -18,8 +18,13 @@ class SparkContextServiceTest
 
   private val oldSystemProperties = System.getProperties
 
+  private val dataSetPath = "dataSetPath"
+  private val dataSetNumberOfRows = 314
+  private val dataSetNumberOfColumns = 5
+
   private var sparkContext: SparkContext = null
   private var service: SparkContextService = null
+  private var dataSetRDD: RDD[String] = null
 
   override protected def beforeEach() = {
     val newSystemSettings = new Properties(oldSystemProperties)
@@ -27,6 +32,11 @@ class SparkContextServiceTest
     System.setProperties(newSystemSettings)
 
     sparkContext = mock[SparkContext]
+    dataSetRDD = mock[RDD[String]]
+    when(dataSetRDD.count()).thenReturn(dataSetNumberOfRows)
+    when(dataSetRDD.first()).thenReturn("1,2,3,4,5")
+    when(sparkContext.textFile(anyString(), anyInt())).thenReturn(dataSetRDD)
+
     service = new SparkContextService(sparkContext)
   }
 
@@ -40,8 +50,8 @@ class SparkContextServiceTest
     // Given
 
     // When
-    service.registerDataSet("somePath")
-    service.registerDataSet("somePath")
+    service.registerDataSet(dataSetPath)
+    service.registerDataSet(dataSetPath)
 
     // Then
     verify(sparkContext, times(1)).textFile(anyString(), anyInt())
@@ -67,10 +77,10 @@ class SparkContextServiceTest
     when(sparkContext.textFile(anyString, anyInt)).thenReturn(rdd)
 
     // When
-    val dataSet: RDD[String] = service.getDataSetOrRegister(dataSetPath)
+    val dataSet = service.getDataSetOrRegister(dataSetPath)
 
     // Then
-    dataSet should equal(rdd)
+    dataSet.getRawData should equal(rdd)
   }
 
   test("registered data set is reported as contained") {
@@ -126,12 +136,26 @@ class SparkContextServiceTest
   }
 
   test("provides raw spark context") {
-    // Given
-
     // When
     val retrievedSparkContext = service.getSparkContext
 
     // Then
     retrievedSparkContext should equal(sparkContext)
+  }
+
+  test("counts rows of data set") {
+    // When
+    val registrationResult = service.registerDataSet(dataSetPath)
+
+    // Then
+    registrationResult.getNumberOfRows should equal(dataSetNumberOfRows)
+  }
+
+  test("counts columns of data set") {
+    // When
+    val registrationResult = service.registerDataSet(dataSetPath)
+
+    // Them
+    registrationResult.getNumberOfColumns should equal(dataSetNumberOfColumns)
   }
 }

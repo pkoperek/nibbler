@@ -1,10 +1,11 @@
 package nibbler
 
-import org.apache.spark.SparkContext
+import java.io.{FileNotFoundException, File}
+
 import org.apache.spark.rdd.RDD
 import org.scalatra._
 import spray.json._
-
+import nibbler.DataSetJsonProtocol._
 
 class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 
@@ -14,6 +15,18 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
     val filteredValues: Array[Int] = sparkContextService.getSparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
 
     "Test query result: " + filteredValues.mkString(",") + "\nParameters used: " + params
+  }
+
+  post("/register") {
+    val requestAsJson = request.body.parseJson.asJsObject
+    val inputFilePath = getValue(requestAsJson, "inputFile")
+
+    if (new File(inputFilePath).exists()) {
+      val dataSet = sparkContextService.registerDataSet(inputFilePath)
+      dataSet.toJson
+    } else {
+      throw new FileNotFoundException(inputFilePath)
+    }
   }
 
   post("/evaluate") {
@@ -35,7 +48,7 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
   }
 
   private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    inputParser.parse(sparkContextService.getDataSetOrRegister(inputFilePath))
+    inputParser.parse(sparkContextService.getDataSetOrRegister(inputFilePath).getRawData)
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {
@@ -71,4 +84,3 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
   }
 
 }
-

@@ -1,12 +1,10 @@
 package nibbler
 
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
-import scala.collection.immutable.Range.Inclusive
 import scala.collection.mutable
 
-class SparkContextService(sparkContext: SparkContext) {
+class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
 

@@ -1,8 +1,5 @@
 package nibbler
 
-/**
- * Created by koperek on 30.08.14.
- */
 private object SymbolicDifferentiation {
 
   private val AnyVariable = "var_\\d+".r

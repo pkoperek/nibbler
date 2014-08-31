@@ -35,8 +35,7 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
   }
 
   private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    val inputAsText = sparkContextService.retrieveDataSet(inputFilePath)
-    inputParser.parse(inputAsText)
+    inputParser.parse(sparkContextService.getDataSetOrRegister(inputFilePath))
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {

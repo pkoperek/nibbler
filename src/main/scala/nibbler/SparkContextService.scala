@@ -10,6 +10,16 @@ class SparkContextService(sparkContext: SparkContext) {
 
   private val initializedDataSets = mutable.Map[String, RDD[String]]()
 
+  def getDataSetOrRegister(dataSetPath: String): RDD[String] = {
+    val dataSet = getDataSet(dataSetPath)
+
+    if(dataSet.isEmpty) {
+      registerDataSet(dataSetPath)
+    } else {
+      dataSet.get
+    }
+  }
+
   def getSparkContext: SparkContext = sparkContext
 
   def containsDataSet(dataSetPath: String): Boolean = {
@@ -20,17 +30,11 @@ class SparkContextService(sparkContext: SparkContext) {
     initializedDataSets.remove(dataSetPath)
   }
 
-  def retrieveDataSet(dataSetPath: String): RDD[String] = {
-    val dataSet = initializedDataSets.get(dataSetPath)
-
-    if (dataSet.isEmpty) {
-      throw new IllegalArgumentException("Requested not registered dataset!")
-    }
-
-    dataSet.get
+  def getDataSet(dataSetPath: String): Option[RDD[String]] = {
+    initializedDataSets.get(dataSetPath)
   }
 
-  def registerDataSet(dataSetPath: String) = {
+  def registerDataSet(dataSetPath: String): RDD[String] = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
         sparkContext.textFile(dataSetPath)

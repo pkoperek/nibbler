@@ -54,17 +54,23 @@ class SparkContextServiceTest
     when(sparkContext.textFile(anyString(), anyInt())).thenReturn(rdd)
 
     // When
-    service.registerDataSet(requestedDataSet)
-    val retrievedDataSet = service.retrieveDataSet(requestedDataSet)
+    val registeredDataSet = service.registerDataSet(requestedDataSet)
 
     // Then
-    retrievedDataSet should not equal null
+    registeredDataSet should not equal null
   }
 
-  test("retrieveing not registered dataset throws exception") {
-    intercept[IllegalArgumentException] {
-      service.retrieveDataSet("blah")
-    }
+  test("get or else register data set") {
+    // Given
+    val rdd = mock[RDD[String]]
+    val dataSetPath = "someDataSetPath"
+    when(sparkContext.textFile(anyString, anyInt)).thenReturn(rdd)
+
+    // When
+    val dataSet: RDD[String] = service.getDataSetOrRegister(dataSetPath)
+
+    // Then
+    dataSet should equal(rdd)
   }
 
   test("registered data set is reported as contained") {
@@ -104,7 +110,6 @@ class SparkContextServiceTest
     catch {
       case _ => fail("exception shouldn't be thrown")
     }
-
   }
 
   test("unregistering data set removes from cache") {

@@ -3,9 +3,9 @@ package nibbler
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
-trait NumericalDifferentiator extends Serializable  {
+trait NumericalDifferentiator extends Serializable {
   def partialDerivative(input: RDD[Seq[Double]]): RDD[Double] = {
-    if(!validateInput(input)) {
+    if (!validateInput(input)) {
       throw new IllegalArgumentException("Dataset doesn't contain at least two values in sequence!")
     }
 
@@ -20,10 +20,10 @@ trait NumericalDifferentiator extends Serializable  {
   }
 }
 
-object NumericalDifferentiator {
+object NumericalDifferentiator extends Serializable {
   def apply(name: String, differentialQuotientDividend: Int, differentialQuotientDivisor: Int): NumericalDifferentiator = {
 
-    if(differentialQuotientDividend == differentialQuotientDivisor) {
+    if (differentialQuotientDividend == differentialQuotientDivisor) {
       throw new IllegalArgumentException("dividend index can't be equal to divisor index!")
     }
 
@@ -33,28 +33,30 @@ object NumericalDifferentiator {
     }
   }
 
+  private def reverse(input: (Seq[Double], Long)): (Long, Seq[Double]) = {
+    input.swap
+  }
+
   /**
    * x_n - x_n-1
    */
   private class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
+      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
+      val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_1)
 
-      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map {
-        _.swap
-      }
-      val subtrahend: RDD[(Long, Seq[Double])] = minuend.map((row: (Long, Seq[Double])) => {
-        (row._1 - 1, row._2)
-      })
+      minuend.join(subtrahend).map(differentiate)
+    }
 
-      val diff: RDD[Double] = minuend.join(subtrahend).map((row: (Long, (Seq[Double], Seq[Double]))) => {
-        val minuendRow = row._2._1
-        val subtrahendRow = row._2._2
+    private def differentiate(row: (Long, (Seq[Double], Seq[Double]))) = {
+      val minuendRow = row._2._1
+      val subtrahendRow = row._2._2
 
-        val quotient = (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
-        quotient
-      })
+      (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
+    }
 
-      diff
+    private def minus_1(row: (Long, Seq[Double])) = {
+      (row._1 - 1, row._2)
     }
   }
 
@@ -63,23 +65,21 @@ object NumericalDifferentiator {
    */
   private class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
+      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
+      val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_2)
 
-      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map {
-        _.swap
-      }
-      val subtrahend: RDD[(Long, Seq[Double])] = minuend.map((row: (Long, Seq[Double])) => {
-        (row._1 - 2, row._2)
-      })
+      minuend.join(subtrahend).map(differentiate)
+    }
 
-      val diff: RDD[Double] = minuend.join(subtrahend).map((row: (Long, (Seq[Double], Seq[Double]))) => {
-        val minuendRow = row._2._1
-        val subtrahendRow = row._2._2
+    private def differentiate(row: (Long, (Seq[Double], Seq[Double]))) = {
+      val minuendRow = row._2._1
+      val subtrahendRow = row._2._2
 
-        val quotient = (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
-        quotient
-      })
+      (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
+    }
 
-      diff
+    private def minus_2(row: (Long, Seq[Double])) = {
+      (row._1 - 2, row._2)
     }
   }
 

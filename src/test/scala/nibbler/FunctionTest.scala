@@ -32,7 +32,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
                """.parseJson
 
     // When
-    val function = Function.buildFunction(json.asJsObject)
+    val function = FunctionBuilder.buildFunction(json.asJsObject)
     val evaluatedValue = function.evaluate(List(3.1415))
 
     // Then
@@ -453,7 +453,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   private def evaluateJsonWithParams(jsonText: String): Double = {
     val json = jsonText.parseJson
-    val function = Function.buildFunction(json.asJsObject)
+    val function = FunctionBuilder.buildFunction(json.asJsObject)
     function.evaluate(List())
   }
 

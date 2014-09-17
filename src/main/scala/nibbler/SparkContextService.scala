@@ -35,7 +35,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
   def registerDataSet(dataSetPath: String): DataSet = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
-        val rdd = sparkContext.textFile(dataSetPath)
+        val rdd = sparkContext.textFile(dataSetPath).cache()
 
         val rowsCount = rdd.count()
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0

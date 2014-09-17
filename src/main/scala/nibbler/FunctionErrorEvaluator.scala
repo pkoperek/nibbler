@@ -42,7 +42,7 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
 
   private def numericalDifferentiation(input: RDD[Seq[Double]], pair: (Int, Int)): RDD[(Long, Double)] = {
     val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-    val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
+    val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx).cache()
     numericallyDifferentiated
   }
 

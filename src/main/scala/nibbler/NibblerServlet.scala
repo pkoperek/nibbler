@@ -29,7 +29,7 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
     val requestAsJson = request.body.parseJson.asJsObject
 
     val inputFile = getValue(requestAsJson, "inputFile")
-    val input = parse(inputFile)
+    val input = parse(inputFile).cache()
 
     val function = getValue(requestAsJson, "function")
     val functionDeserializeed = parseFunction(function)

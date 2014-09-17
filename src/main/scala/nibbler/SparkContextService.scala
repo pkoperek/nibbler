@@ -54,19 +54,24 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 object SparkContextService {
   private val executorUri = "http://d3kbcqa49mib13.cloudfront.net/spark-1.0.0-bin-hadoop2.tgz"
   private val defaultMasterUri = "mesos://zk://master:2181/mesos"
+  private val defaultExecutorMemory = "512m"
 
   val nibblerMasterUriKey: String = "nibbler.master.uri"
+  val sparkExecucorMemory: String = "spark.executor.memory"
 
   def apply(nibblerJarRealPath: String, appName: String): SparkContextService = {
-    val masterUri = System.getProperty(nibblerMasterUriKey, defaultMasterUri)
-    new SparkContextService(createSparkContext(nibblerJarRealPath, appName, masterUri))
+    new SparkContextService(createSparkContext(nibblerJarRealPath, appName))
   }
 
-  private def createSparkContext(nibblerJarRealPath: String, appName: String, masterUri: String): SparkContext = {
+  private def createSparkContext(nibblerJarRealPath: String, appName: String): SparkContext = {
+    val masterUri = System.getProperty(nibblerMasterUriKey, defaultMasterUri)
+    val executorMemory = System.getProperty(sparkExecucorMemory, defaultExecutorMemory)
+
     val conf = new SparkConf()
       .setAppName(appName)
       .set("spark.executor.uri", executorUri)
       .setMaster(masterUri)
+      .set("spark.executor.memory", executorMemory)
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
 
     val ctx = new SparkContext(conf)

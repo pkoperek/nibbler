@@ -40,7 +40,7 @@ object NumericalDifferentiator extends Serializable {
   /**
    * x_n - x_n-1
    */
-  private class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
+  private case class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
       val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_1)
@@ -63,7 +63,7 @@ object NumericalDifferentiator extends Serializable {
   /**
    * x_n - x_n-2
    */
-  private class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
+  private case class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
       val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_2)

@@ -9,8 +9,6 @@ import nibbler.DataSetJsonProtocol._
 
 class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 
-  private val inputParser = new HistdataInputParser
-
   get("/status") {
     val filteredValues: Array[Int] = sparkContextService.getSparkContext.parallelize(1 to 10000).filter(_ < 10).collect()
 
@@ -43,8 +41,8 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
     FunctionBuilder.buildFunction(function.parseJson.asJsObject)
   }
 
-  private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    inputParser.parse(sparkContextService.getDataSetOrRegister(inputFilePath).getRawData)
+  private def parse(inputFilePath: String): DataSet = {
+    sparkContextService.getDataSetOrRegister(inputFilePath)
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {

@@ -28,7 +28,7 @@ class FunctionErrorEvaluatorTest extends FunSuite with MockitoSugar with ShouldM
 
   private def evaluate(function: Function, input: Seq[Seq[Double]]): Double = {
     new FunctionErrorEvaluator("backward").evaluate(
-      sparkContext.parallelize(input),
+      new DataSet(2, 2, sparkContext.parallelize(input)),
       function
     )
   }

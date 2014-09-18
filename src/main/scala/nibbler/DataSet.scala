@@ -5,7 +5,7 @@ import spray.json._
 
 import scala.collection.mutable
 
-class DataSet(numberOfRows: Long, numberOfColumns: Long, rawData: RDD[Seq[Double]]) {
+class DataSet(numberOfRows: Long, numberOfColumns: Long, rawData: RDD[Seq[Double]]) extends Serializable {
 
   private val numericalDerivatives = mutable.HashMap.empty[String, RDD[(Long, Double)]]
 

@@ -44,10 +44,6 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
     input.getNumericallyDifferentiated(differentiatorType, pair)
   }
 
-  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
-    (row._1 + 1, row._2)
-  }
-
   private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
 }

@@ -1,5 +1,7 @@
 package nibbler
 
+import com.esotericsoftware.kryo.Kryo
+import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable
@@ -51,13 +53,28 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
 }
 
+class NibblerRegistrator extends KryoRegistrator {
+  override def registerClasses(kryo: Kryo) {
+    kryo.register(classOf[DataSet])
+    kryo.register(classOf[ErrorCalculationFunction])
+    kryo.register(classOf[Function])
+    kryo.register(classOf[FunctionErrorEvaluator])
+    kryo.register(classOf[FunctionNode])
+    kryo.register(classOf[HistdataInputParser])
+    kryo.register(classOf[HistdataTimestampParser])
+    kryo.register(classOf[NumericalDifferentiator])
+    kryo.register(classOf[PairGenerator])
+    kryo.register(BasicFunctions.getClass)
+  }
+}
+
 object SparkContextService {
   private val executorUri = "http://d3kbcqa49mib13.cloudfront.net/spark-1.0.0-bin-hadoop2.tgz"
   private val defaultMasterUri = "mesos://zk://master:2181/mesos"
   private val defaultExecutorMemory = "512m"
 
   val nibblerMasterUriKey: String = "nibbler.master.uri"
-  val sparkExecucorMemory: String = "spark.executor.memory"
+  val sparkExecutorMemory: String = "spark.executor.memory"
 
   def apply(nibblerJarRealPath: String, appName: String): SparkContextService = {
     new SparkContextService(createSparkContext(nibblerJarRealPath, appName))
@@ -65,7 +82,7 @@ object SparkContextService {
 
   private def createSparkContext(nibblerJarRealPath: String, appName: String): SparkContext = {
     val masterUri = System.getProperty(nibblerMasterUriKey, defaultMasterUri)
-    val executorMemory = System.getProperty(sparkExecucorMemory, defaultExecutorMemory)
+    val executorMemory = System.getProperty(sparkExecutorMemory, defaultExecutorMemory)
 
     val conf = new SparkConf()
       .setAppName(appName)
@@ -73,6 +90,7 @@ object SparkContextService {
       .setMaster(masterUri)
       .set("spark.executor.memory", executorMemory)
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
     val ctx = new SparkContext(conf)
     ctx.addJar(nibblerJarRealPath)

@@ -13,18 +13,16 @@ class DataSet(numberOfRows: Long, numberOfColumns: Long, rawData: RDD[Seq[Double
     val derivative = differentiatorType + pair
     if (!(numericalDerivatives contains derivative)) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-      val numericallyDifferentiated = differentiator.partialDerivative(rawData).zipWithIndex().map(reverse).map(incrementIdx)
+      val numericallyDifferentiated = differentiator.partialDerivative(rawData).zipWithIndex().map(reverseAndIncrementIdx)
       numericalDerivatives += (derivative -> numericallyDifferentiated)
     }
 
     numericalDerivatives.get(derivative).get
   }
 
-  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
-    (row._1 + 1, row._2)
+  private def reverseAndIncrementIdx(row: (Double, Long)): (Long, Double) = {
+    (row._2, row._1 + 1L)
   }
-
-  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
   def getNumberOfRows = numberOfRows
 

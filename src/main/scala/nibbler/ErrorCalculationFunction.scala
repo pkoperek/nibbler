@@ -5,7 +5,7 @@ import org.apache.spark.rdd.RDD
 
 class ErrorCalculationFunction extends Serializable {
 
-  private def minus(row: (Long, (Double, Double))) = {
+  private def computeError(row: (Long, (Double, Double))) = {
     (1L, Math.log(Math.abs(row._2._1 - row._2._2) + 1.0))
   }
 
@@ -15,7 +15,7 @@ class ErrorCalculationFunction extends Serializable {
 
   def calculateError(symbolicallyDifferentiated: RDD[(Long, Double)], numericallyDifferentiated: RDD[(Long, Double)]): Double = {
     val (count, sumOfRowErrors) = numericallyDifferentiated.join(symbolicallyDifferentiated)
-      .map(minus)
+      .map(computeError)
       .reduce(add)
 
     -sumOfRowErrors / count

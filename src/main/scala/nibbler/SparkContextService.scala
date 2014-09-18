@@ -41,11 +41,15 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         val rowsCount = rdd.count()
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
 
-        new DataSet(
+        val dataSetToReturn = new DataSet(
           rowsCount,
           columnsCount,
           inputParser.parse(rdd).cache()
         )
+
+        rdd.unpersist()
+
+        dataSetToReturn
       })
     }
   }

@@ -1,6 +1,5 @@
 package nibbler
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {

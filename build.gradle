@@ -49,6 +49,9 @@ dependencies {
 
     // hadoop-client
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.4.0'
+
+    // enforce snappy in specific version
+    compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.0'
 }
 
 // manually specify gradle version for gradlew

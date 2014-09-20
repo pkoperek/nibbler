@@ -45,10 +45,13 @@ dependencies {
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'
 
     // spark 
-    compile group: 'org.apache.spark', name: 'spark-core_2.10', version: '1.0.0'
+    compile group: 'org.apache.spark', name: 'spark-core_2.10', version: '1.1.0'
 
     // hadoop-client
-    compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.2.0'
+    compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.4.0'
+
+    // enforce snappy in specific version
+    compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.0'
 }
 
 // manually specify gradle version for gradlew

@@ -9,6 +9,7 @@ import scala.collection.mutable
 class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
+  private val inputParser = new HistdataInputParser
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
@@ -45,7 +46,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         new DataSet(
           rowsCount,
           columnsCount,
-          rdd
+          inputParser.parse(rdd).cache()
         )
       })
     }

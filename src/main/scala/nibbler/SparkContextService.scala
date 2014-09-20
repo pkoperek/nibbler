@@ -9,7 +9,6 @@ import scala.collection.mutable
 class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
-  private val inputParser = new HistdataInputParser
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
@@ -42,11 +41,12 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
         val rowsCount = rdd.count()
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
+        val parsed = rdd.map(HistdataInputParser.parseLine)
 
         new DataSet(
           rowsCount,
           columnsCount,
-          inputParser.parse(rdd).cache()
+          parsed.cache()
         )
       })
     }
@@ -61,11 +61,11 @@ class NibblerRegistrator extends KryoRegistrator {
     kryo.register(classOf[Function])
     kryo.register(classOf[FunctionErrorEvaluator])
     kryo.register(classOf[FunctionNode])
-    kryo.register(classOf[HistdataInputParser])
     kryo.register(classOf[HistdataTimestampParser])
     kryo.register(classOf[NumericalDifferentiator])
     kryo.register(classOf[PairGenerator])
     kryo.register(BasicFunctions.getClass)
+    kryo.register(HistdataInputParser.getClass)
   }
 }
 

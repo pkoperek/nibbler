@@ -2,15 +2,11 @@ package nibbler
 
 import org.apache.spark.rdd.RDD
 
-class HistdataInputParser extends Serializable {
+object HistdataInputParser extends Serializable {
 
   private val timestampParser = new HistdataTimestampParser
 
-  def parse(textInput: RDD[String]): RDD[Seq[Double]] = {
-    textInput.map(parseLine)
-  }
-
-  private def parseLine(row: String) = {
+  def parseLine(row: String): Seq[Double] = {
     val splitted = row.split(",")
     val timestamp: Long = timestampParser.parse(splitted(0))
     val numbers = splitted.splitAt(1)._2

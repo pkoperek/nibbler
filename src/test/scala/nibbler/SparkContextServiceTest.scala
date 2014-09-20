@@ -7,6 +7,8 @@ import org.apache.spark.rdd.RDD
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
@@ -31,8 +33,9 @@ class SparkContextServiceTest
     newSystemSettings.setProperty(SparkContextService.nibblerMasterUriKey, "local")
     System.setProperties(newSystemSettings)
 
+    val parsedRDD = mock[RDD[Seq[Double]]]
     sparkContext = mock[SparkContext]
-    dataSetRDD = mock[RDD[String]]
+    dataSetRDD = mock[RDD[String]](returnRddForMap(parsedRDD))
     when(dataSetRDD.count()).thenReturn(dataSetNumberOfRows)
     when(dataSetRDD.first()).thenReturn("1,2,3,4,5")
     when(sparkContext.textFile(anyString(), anyInt())).thenReturn(dataSetRDD)
@@ -59,7 +62,7 @@ class SparkContextServiceTest
 
   test("registers new data set") {
     // Given
-    val rdd = mock[RDD[String]]
+    val rdd = mock[RDD[String]](RETURNS_DEEP_STUBS)
     val requestedDataSet = "someFilePath"
     when(sparkContext.textFile(anyString(), anyInt())).thenReturn(rdd)
 
@@ -72,7 +75,9 @@ class SparkContextServiceTest
 
   test("get or else register data set") {
     // Given
-    val rdd = mock[RDD[String]]
+    val cachedRdd = mock[RDD[Seq[Double]]]
+    val parsedRdd = mock[RDD[Seq[Double]]](returnRddForCache(cachedRdd))
+    val rdd = mock[RDD[String]](returnRddForMap(parsedRdd))
     val dataSetPath = "someDataSetPath"
     when(sparkContext.textFile(anyString, anyInt)).thenReturn(rdd)
 
@@ -80,7 +85,8 @@ class SparkContextServiceTest
     val dataSet = service.getDataSetOrRegister(dataSetPath)
 
     // Then
-    dataSet.getRawData should equal(rdd)
+    dataSet.getRawData should not equal rdd
+    dataSet.getRawData should equal(cachedRdd)
   }
 
   test("registered data set is reported as contained") {
@@ -157,5 +163,27 @@ class SparkContextServiceTest
 
     // Them
     registrationResult.getNumberOfColumns should equal(dataSetNumberOfColumns)
+  }
+
+  private def returnRddForMap(otherMock: RDD[Seq[Double]]): Answer[RDD[Seq[Double]]] = {
+    new Answer[RDD[Seq[Double]]]() {
+      override def answer(invocation: InvocationOnMock): RDD[Seq[Double]] = {
+        if (invocation.getMethod.getName.equals("map"))
+          otherMock
+        else
+          null
+      }
+    }
+  }
+
+  def returnRddForCache(otherMock: RDD[Seq[Double]]) = {
+    new Answer[RDD[Seq[Double]]]() {
+      override def answer(invocation: InvocationOnMock): RDD[Seq[Double]] = {
+        if (invocation.getMethod.getName.equals("cache"))
+          otherMock
+        else
+          null
+      }
+    }
   }
 }

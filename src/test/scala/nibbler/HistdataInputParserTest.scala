@@ -9,11 +9,9 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class HistdataInputParserTest extends FunSuite with MockitoSugar with ShouldMatchers with SparkContextAware {
 
-  private val inputParser = new HistdataInputParser()
-
   test("reads multiple rows") {
     // Given
-    val input = List("20000530 172736000,0.1","20000530 172737000,0.5")
+    val input = List("20000530 172736000,0.1", "20000530 172737000,0.5")
 
     // When
     val parsed: Array[Seq[Double]] = parse(input)
@@ -24,7 +22,7 @@ class HistdataInputParserTest extends FunSuite with MockitoSugar with ShouldMatc
 
   test("preserves order when reading multiple rows") {
     // Given
-    val input = List("20000530 172736000,0.1","20000530 172737000,0.5")
+    val input = List("20000530 172736000,0.1", "20000530 172737000,0.5")
 
     // When
     val parsed: Array[Seq[Double]] = parse(input)
@@ -92,7 +90,7 @@ class HistdataInputParserTest extends FunSuite with MockitoSugar with ShouldMatc
   }
 
   private def parse(input: List[String]): Array[Seq[Double]] = {
-    inputParser.parse(sparkContext.parallelize(input)).collect()
+    sparkContext.parallelize(input).map(HistdataInputParser.parseLine).collect()
   }
 
 }

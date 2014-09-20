@@ -90,6 +90,8 @@ object SparkContextService {
       .set("spark.executor.uri", executorUri)
       .setMaster(masterUri)
       .set("spark.executor.memory", executorMemory)
+      .set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
+      .set("spark.storage.memoryFraction", "0.25")
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "nibbler.NibblerRegistrator")

@@ -1,6 +1,5 @@
 package nibbler
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
@@ -30,10 +29,7 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
     val df_dx = function.differentiate("var_" + pair._1)
     val df_dy = function.differentiate("var_" + pair._2)
 
-    val df_dx_evaluated: RDD[(Long, Double)] = input.map(df_dx.evaluate).zipWithIndex().map(reverse)
-    val df_dy_evaluated: RDD[(Long, Double)] = input.map(df_dy.evaluate).zipWithIndex().map(reverse)
-
-    df_dy_evaluated.join(df_dx_evaluated).map(divide)
+    input.map(x => df_dy.evaluate(x) / df_dx.evaluate(x)).zipWithIndex().map(reverse)
   }
 
   private def divide(row: (Long, (Double, Double))) = {

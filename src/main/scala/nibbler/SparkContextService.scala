@@ -49,7 +49,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         val numericallyDifferentiated = mutable.Map[(Int, Int), RDD[(Long, Double)]]()
         for (pair <- pairGenerator.generatePairs(columnsCount)) {
           val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-          val differentiatedByPair: RDD[(Long, Double)] = differentiator.partialDerivative(parsed).zipWithIndex().map(reverse).map(incrementIdx)
+          val differentiatedByPair: RDD[(Long, Double)] = differentiator.partialDerivative(parsed)
           numericallyDifferentiated += (pair -> differentiatedByPair.persist(StorageLevel.MEMORY_AND_DISK))
         }
 
@@ -61,13 +61,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
       })
     }
   }
-
-
-  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
-    (row._1 + 1, row._2)
-  }
-
-  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
 }
 

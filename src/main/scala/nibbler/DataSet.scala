@@ -4,8 +4,7 @@ import org.apache.spark.rdd.RDD
 import spray.json._
 
 class DataSet(
-               numberOfRows: Long,
-               numberOfColumns: Long,
+               size: (Long, Int),
                rawData: RDD[Seq[Double]],
                numericallyDifferentiated: Map[(Int, Int), RDD[(Long, Double)]]
                ) {
@@ -14,9 +13,9 @@ class DataSet(
     numericallyDifferentiated(pair)
   }
 
-  def getNumberOfRows = numberOfRows
+  def getNumberOfRows = size._1
 
-  def getNumberOfColumns = numberOfColumns
+  def getNumberOfColumns = size._2
 
   def getRawData = rawData
 }

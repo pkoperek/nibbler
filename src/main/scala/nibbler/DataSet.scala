@@ -20,3 +20,19 @@ class DataSet(
   def getRawData = rawData
 }
 
+object DataSet {
+  def apply(
+             size: (Long, Int),
+             rawData: RDD[Seq[Double]],
+             numericallyDifferentiated: Map[(Int, Int), RDD[(Long, Double)]]
+             ) = {
+    new DataSet(size, rawData, numericallyDifferentiated)
+  }
+
+  def apply(
+             size: (Long, Int),
+             rawData: RDD[Seq[Double]]
+             ) = {
+    new DataSet(size, rawData, Map[(Int, Int), RDD[(Long, Double)]]())
+  }
+}

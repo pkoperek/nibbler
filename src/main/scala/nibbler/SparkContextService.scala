@@ -3,6 +3,7 @@ package nibbler
 import com.esotericsoftware.kryo.Kryo
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable
@@ -49,9 +50,8 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         for (pair <- pairGenerator.generatePairs(columnsCount)) {
           val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
           val differentiatedByPair: RDD[(Long, Double)] = differentiator.partialDerivative(parsed).zipWithIndex().map(reverse).map(incrementIdx)
-          numericallyDifferentiated += (pair -> differentiatedByPair)
+          numericallyDifferentiated += (pair -> differentiatedByPair.persist(StorageLevel.MEMORY_AND_DISK))
         }
-
 
         new DataSet(
           (rowsCount, columnsCount),

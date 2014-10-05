@@ -2,7 +2,7 @@ package nibbler
 
 import org.apache.spark.rdd.RDD
 
-class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
+class FunctionErrorEvaluator() extends Serializable {
 
   private val errorCalculationFunction = new ErrorCalculationFunction
   private val pairGenerator = new PairGenerator

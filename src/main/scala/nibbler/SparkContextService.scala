@@ -9,6 +9,7 @@ import scala.collection.mutable
 class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
+  private val pairGenerator = new PairGenerator
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
@@ -43,15 +44,29 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
         val parsed = rdd.map(HistdataInputParser.parseLine)
 
+        pairGenerator.generatePairs()
+
+        numericallyDifferentiate()
+
         new DataSet(
-          rowsCount,
-          columnsCount,
+          (rowsCount, columnsCount),
           parsed.cache()
         )
       })
     }
   }
 
+
+  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
+    (row._1 + 1, row._2)
+  }
+
+  private def reverse(toReverse: (Double, Long)) = toReverse.swap
+
+  def numericallyDifferentiate(differentiatorType: String, pair: (Int, Int)) = {
+    val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
+    val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
+  }
 }
 
 class NibblerRegistrator extends KryoRegistrator {

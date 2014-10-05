@@ -1,6 +1,7 @@
 package nibbler
 
 import com.esotericsoftware.kryo.Kryo
+import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -11,11 +12,11 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
   private val initializedDataSets = mutable.Map[String, DataSet]()
   private val pairGenerator = new PairGenerator
 
-  def getDataSetOrRegister(dataSetPath: String): DataSet = {
+  def getDataSetOrRegister(dataSetPath: String, differentiatorType: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
 
     if (dataSet.isEmpty) {
-      registerDataSet(dataSetPath)
+      registerDataSet(dataSetPath, differentiatorType)
     } else {
       dataSet.get
     }
@@ -35,7 +36,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     initializedDataSets.get(dataSetPath)
   }
 
-  def registerDataSet(dataSetPath: String): DataSet = {
+  def registerDataSet(dataSetPath: String, differentiatorType: String): DataSet = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
         val rdd = sparkContext.textFile(dataSetPath)
@@ -44,13 +45,18 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
         val parsed = rdd.map(HistdataInputParser.parseLine)
 
-        pairGenerator.generatePairs()
+        val numericallyDifferentiated = mutable.Map[(Int, Int), RDD[(Long, Double)]]()
+        for (pair <- pairGenerator.generatePairs(columnsCount)) {
+          val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
+          val differentiatedByPair: RDD[(Long, Double)] = differentiator.partialDerivative(parsed).zipWithIndex().map(reverse).map(incrementIdx)
+          numericallyDifferentiated += (pair -> differentiatedByPair)
+        }
 
-        numericallyDifferentiate()
 
         new DataSet(
           (rowsCount, columnsCount),
-          parsed.cache()
+          parsed.cache(),
+          numericallyDifferentiated.toMap
         )
       })
     }
@@ -63,10 +69,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
-  def numericallyDifferentiate(differentiatorType: String, pair: (Int, Int)) = {
-    val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-    val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
-  }
 }
 
 class NibblerRegistrator extends KryoRegistrator {

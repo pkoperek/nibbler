@@ -32,10 +32,6 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
     input.map(x => df_dy.evaluate(x) / df_dx.evaluate(x)).zipWithIndex().map(reverse)
   }
 
-  private def divide(row: (Long, (Double, Double))) = {
-    (row._1, row._2._1 / row._2._2)
-  }
-
   private def numericalDifferentiation(input: RDD[Seq[Double]], pair: (Int, Int)): RDD[(Long, Double)] = {
     val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
     val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)

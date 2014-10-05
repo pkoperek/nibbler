@@ -7,7 +7,7 @@ class DataSet(
                size: (Long, Int),
                rawData: RDD[Seq[Double]],
                numericallyDifferentiated: Map[(Int, Int), RDD[(Long, Double)]]
-               ) {
+               ) extends Serializable {
 
   def getNumericallyDifferentiated(pair: (Int, Int)): RDD[(Long, Double)] = {
     numericallyDifferentiated(pair)

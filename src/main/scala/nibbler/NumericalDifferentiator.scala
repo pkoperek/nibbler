@@ -4,13 +4,19 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 trait NumericalDifferentiator extends Serializable {
-  def partialDerivative(input: RDD[Seq[Double]]): RDD[Double] = {
+  def partialDerivative(input: RDD[Seq[Double]]): RDD[(Long, Double)] = {
     if (!validateInput(input)) {
       throw new IllegalArgumentException("Dataset doesn't contain at least two values in sequence!")
     }
 
-    partialDerivativeInternal(input)
+    partialDerivativeInternal(input).zipWithIndex().map(reverse).map(incrementIdx)
   }
+
+  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
+    (row._1 + 1, row._2)
+  }
+
+  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
   def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double]
 
@@ -42,7 +48,7 @@ object NumericalDifferentiator extends Serializable {
    */
   private class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
-      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
+      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(NumericalDifferentiator.reverse)
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_1)
 
       minuend.join(subtrahend).map(differentiate)
@@ -65,7 +71,7 @@ object NumericalDifferentiator extends Serializable {
    */
   private class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
     override def partialDerivativeInternal(input: RDD[Seq[Double]]): RDD[Double] = {
-      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(reverse)
+      val minuend: RDD[(Long, Seq[Double])] = input.zipWithIndex().map(NumericalDifferentiator.reverse)
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(minus_2)
 
       minuend.join(subtrahend).map(differentiate)

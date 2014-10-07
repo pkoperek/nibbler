@@ -17,32 +17,39 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
 
   post("/register") {
     val requestAsJson = request.body.parseJson.asJsObject
-    val inputFilePath = getValue(requestAsJson, "inputFile")
-
-    val dataSet = sparkContextService.registerDataSet(inputFilePath)
+    val inputFilePath = getInputFile(requestAsJson)
+    val differentiatorType = getNumericalDifferentiatorType(requestAsJson)
+    val dataSet = sparkContextService.getDataSetOrRegister(inputFilePath, differentiatorType)
     dataSet.toJson
   }
 
   post("/evaluate") {
     val requestAsJson = request.body.parseJson.asJsObject
 
-    val inputFile = getValue(requestAsJson, "inputFile")
-    val input = parse(inputFile)
+    val inputFile = getInputFile(requestAsJson)
+    val differentiatorType = getNumericalDifferentiatorType(requestAsJson)
+    val functionDeserializeed = getFunction(requestAsJson)
+    val inputDataSet = sparkContextService.getDataSetOrRegister(inputFile, differentiatorType)
 
+    new FunctionErrorEvaluator().evaluate(inputDataSet, functionDeserializeed)
+  }
+
+  private def getInputFile(requestAsJson: JsObject): String = {
+    getValue(requestAsJson, "inputFile")
+  }
+
+  private def getNumericalDifferentiatorType(requestAsJson: JsObject): String = {
+    getValueOrDefault(requestAsJson, "numdiff", "backward")
+  }
+
+  private def getFunction(requestAsJson: JsObject): Function = {
     val function = getValue(requestAsJson, "function")
     val functionDeserializeed = parseFunction(function)
-
-    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
-
-    new FunctionErrorEvaluator(differentiatorType).evaluate(input, functionDeserializeed)
+    functionDeserializeed
   }
 
   private def parseFunction(function: String): Function = {
     FunctionBuilder.buildFunction(function.parseJson.asJsObject)
-  }
-
-  private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    sparkContextService.getDataSetOrRegister(inputFilePath).getRawData
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {

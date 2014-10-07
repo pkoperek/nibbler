@@ -1,6 +1,7 @@
 package nibbler
 
 import org.apache.spark.rdd.RDD
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -8,6 +9,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
+@Ignore
 class NumericalDifferentiatorTest extends FunSuite with ShouldMatchers with MockitoSugar with SparkContextAware {
 
   test("accepts 'backward' as differentiator strategy") {

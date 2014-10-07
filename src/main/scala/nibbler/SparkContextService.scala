@@ -1,7 +1,9 @@
 package nibbler
 
 import com.esotericsoftware.kryo.Kryo
+import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable
@@ -9,12 +11,13 @@ import scala.collection.mutable
 class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
+  private val pairGenerator = new PairGenerator
 
-  def getDataSetOrRegister(dataSetPath: String): DataSet = {
+  def getDataSetOrRegister(dataSetPath: String, differentiatorType: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
 
     if (dataSet.isEmpty) {
-      registerDataSet(dataSetPath)
+      registerDataSet(dataSetPath, differentiatorType)
     } else {
       dataSet.get
     }
@@ -34,7 +37,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     initializedDataSets.get(dataSetPath)
   }
 
-  def registerDataSet(dataSetPath: String): DataSet = {
+  def registerDataSet(dataSetPath: String, differentiatorType: String): DataSet = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
         val rdd = sparkContext.textFile(dataSetPath)
@@ -43,10 +46,17 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
         val parsed = rdd.map(HistdataInputParser.parseLine)
 
+        val numericallyDifferentiated = mutable.Map[(Int, Int), RDD[(Long, Double)]]()
+        for (pair <- pairGenerator.generatePairs(columnsCount)) {
+          val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
+          val differentiatedByPair: RDD[(Long, Double)] = differentiator.partialDerivative(parsed)
+          numericallyDifferentiated += (pair -> differentiatedByPair.persist(StorageLevel.MEMORY_AND_DISK))
+        }
+
         new DataSet(
-          rowsCount,
-          columnsCount,
-          parsed.cache()
+          (rowsCount, columnsCount),
+          parsed.cache(),
+          numericallyDifferentiated.toMap
         )
       })
     }

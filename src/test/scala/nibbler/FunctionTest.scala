@@ -1,5 +1,7 @@
 package nibbler
 
+import nibbler.evaluation
+import nibbler.evaluation.{FunctionBuilder, FunctionNode}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.scalatest.FunSuite
@@ -17,7 +19,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val functionTree = mock[FunctionNode]
 
     // When
-    new Function(functionTree).evaluate(dataRow)
+    new evaluation.Function(functionTree).evaluate(dataRow)
 
     // Then
     verify(functionTree).evaluate(dataRow)
@@ -255,7 +257,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
     val functionTree = constant("123")
 
     // When
-    val differentiated = new Function(functionTree).differentiate("var_0")
+    val differentiated = new evaluation.Function(functionTree).differentiate("var_0")
 
     // Then
     differentiated.evaluate(List(1.0)) should be(0.0)
@@ -304,7 +306,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically plus") {
     // Given
-    val toDifferentiate: Function = function(plus(sin(var_0), constant("10")))
+    val toDifferentiate: evaluation.Function = function(plus(sin(var_0), constant("10")))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -315,7 +317,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
 
   test("differentiates symbolically minus") {
     // Given
-    val toDifferentiate: Function = function(minus(constant("10"), sin(var_0)))
+    val toDifferentiate: evaluation.Function = function(minus(constant("10"), sin(var_0)))
 
     // When
     val differentiated = toDifferentiate.differentiate("var_0")
@@ -462,7 +464,7 @@ class FunctionTest extends FunSuite with MockitoSugar with ShouldMatchers {
   }
 
   private def function(tree: FunctionNode) = {
-    new Function(tree)
+    new evaluation.Function(tree)
   }
 
   private def node(name: String, child: FunctionNode) = {

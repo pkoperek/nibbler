@@ -1,5 +1,6 @@
-package nibbler
+package nibbler.api
 
+import nibbler.evaluation.DataSet
 import spray.json._
 
 object DataSetJsonProtocol extends DefaultJsonProtocol {

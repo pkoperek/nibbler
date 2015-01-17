@@ -2,6 +2,7 @@ package nibbler
 
 import java.io.File
 
+import nibbler.api.{SparkContextService, NibblerServlet}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

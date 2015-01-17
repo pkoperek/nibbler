@@ -1,4 +1,4 @@
-package nibbler
+package nibbler.io
 
 object HistdataInputParser extends Serializable {
 

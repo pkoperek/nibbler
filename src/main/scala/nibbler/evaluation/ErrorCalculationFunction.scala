@@ -1,4 +1,4 @@
-package nibbler
+package nibbler.evaluation
 
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD

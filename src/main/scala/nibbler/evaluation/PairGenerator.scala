@@ -1,4 +1,4 @@
-package nibbler
+package nibbler.evaluation
 
 import scala.collection.mutable.ListBuffer
 

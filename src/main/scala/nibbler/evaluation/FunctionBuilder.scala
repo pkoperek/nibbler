@@ -1,13 +1,14 @@
-package nibbler
+package nibbler.evaluation
 
+import nibbler.evaluation
 import spray.json.{JsArray, JsObject}
 
 import scala.collection.mutable.ListBuffer
 
 object FunctionBuilder {
 
-  def buildFunction(inputAsJson: JsObject): Function = {
-    new Function(buildTree(inputAsJson))
+  def buildFunction(inputAsJson: JsObject): evaluation.Function = {
+    new evaluation.Function(buildTree(inputAsJson))
   }
 
   private def buildTree(inputAsJson: JsObject): FunctionNode = {

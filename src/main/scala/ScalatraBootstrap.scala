@@ -1,6 +1,7 @@
 import javax.servlet.ServletContext
 
-import nibbler.{NibblerServlet, SparkContextService}
+import nibbler.SparkContextService
+import nibbler.api.{SparkContextService, NibblerServlet}
 import org.scalatra._
 
 class ScalatraBootstrap extends LifeCycle {

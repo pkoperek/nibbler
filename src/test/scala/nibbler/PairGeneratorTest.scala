@@ -1,5 +1,6 @@
 package nibbler
 
+import nibbler.evaluation.PairGenerator
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

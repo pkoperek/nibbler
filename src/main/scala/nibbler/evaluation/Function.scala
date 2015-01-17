@@ -1,4 +1,6 @@
-package nibbler
+package nibbler.evaluation
+
+import SymbolicDifferentiation
 
 class Function(functionTree: FunctionNode) extends Serializable {
 

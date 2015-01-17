@@ -1,5 +1,6 @@
-package nibbler
+package nibbler.evaluation
 
+import nibbler.evaluation
 import org.apache.spark.rdd.RDD
 
 class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
@@ -7,7 +8,7 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
   private val errorCalculationFunction = new ErrorCalculationFunction
   private val pairGenerator = new PairGenerator
 
-  def evaluate(input: RDD[Seq[Double]], functionDeserialized: Function): Double = {
+  def evaluate(input: RDD[Seq[Double]], functionDeserialized: evaluation.Function): Double = {
     val variablePairs = pairGenerator.generatePairs(2)
     var error = Double.MinValue
 
@@ -25,7 +26,7 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
     error
   }
 
-  private def symbolicDifferentiation(input: RDD[Seq[Double]], function: Function, pair: (Int, Int)): RDD[(Long, Double)] = {
+  private def symbolicDifferentiation(input: RDD[Seq[Double]], function: evaluation.Function, pair: (Int, Int)): RDD[(Long, Double)] = {
     val df_dx = function.differentiate("var_" + pair._1)
     val df_dy = function.differentiate("var_" + pair._2)
 

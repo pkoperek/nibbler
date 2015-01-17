@@ -2,6 +2,7 @@ package nibbler
 
 import java.util.Properties
 
+import nibbler.api.SparkContextService
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.junit.runner.RunWith

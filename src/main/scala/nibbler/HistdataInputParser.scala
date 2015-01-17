@@ -1,7 +1,5 @@
 package nibbler
 
-import org.apache.spark.rdd.RDD
-
 object HistdataInputParser extends Serializable {
 
   private val timestampParser = new HistdataTimestampParser

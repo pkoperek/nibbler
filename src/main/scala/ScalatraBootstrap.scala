@@ -1,6 +1,5 @@
 import javax.servlet.ServletContext
 
-import nibbler.SparkContextService
 import nibbler.api.{SparkContextService, NibblerServlet}
 import org.scalatra._
 

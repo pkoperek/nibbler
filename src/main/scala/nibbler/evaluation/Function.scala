@@ -1,7 +1,5 @@
 package nibbler.evaluation
 
-import SymbolicDifferentiation
-
 class Function(functionTree: FunctionNode) extends Serializable {
 
   def evaluate(input: Seq[Double]): Double = {

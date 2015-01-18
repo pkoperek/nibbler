@@ -4,6 +4,7 @@ import nibbler.evaluation.{Function, FunctionBuilder, FunctionErrorEvaluator}
 import org.apache.spark.rdd.RDD
 import org.scalatra._
 import spray.json._
+import DataSetJsonProtocol._
 
 class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 

@@ -1,6 +1,6 @@
-package nibbler
+package nibbler.evaluation
 
-import nibbler.FunctionBuilder._
+import nibbler.evaluation.FunctionBuilder._
 
 private object SymbolicDifferentiation {
 

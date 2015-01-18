@@ -1,6 +1,8 @@
 package nibbler
 
-import nibbler.FunctionBuilder.{node, plus, sin}
+import nibbler.evaluation.{FunctionErrorEvaluator, FunctionBuilder, FunctionNode}
+import FunctionBuilder.{node, plus, sin}
+import nibbler.evaluation
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -26,7 +28,7 @@ class FunctionErrorEvaluatorTest extends FunSuite with MockitoSugar with ShouldM
     error should be(-2.30258 plusOrMinus 0.00001)
   }
 
-  private def evaluate(function: Function, input: Seq[Seq[Double]]): Double = {
+  private def evaluate(function: evaluation.Function, input: Seq[Seq[Double]]): Double = {
     new FunctionErrorEvaluator("backward").evaluate(
       sparkContext.parallelize(input),
       function
@@ -37,8 +39,8 @@ class FunctionErrorEvaluatorTest extends FunSuite with MockitoSugar with ShouldM
     node("var_" + idx)
   }
 
-  private def f(tree: FunctionNode): Function = {
-    new Function(tree)
+  private def f(tree: FunctionNode): evaluation.Function = {
+    new evaluation.Function(tree)
   }
 
 }

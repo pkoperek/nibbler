@@ -1,4 +1,4 @@
-package nibbler
+package nibbler.evaluation
 
 class Function(functionTree: FunctionNode) extends Serializable {
 

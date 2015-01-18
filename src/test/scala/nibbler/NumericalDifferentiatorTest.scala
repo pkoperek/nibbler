@@ -1,5 +1,6 @@
 package nibbler
 
+import nibbler.evaluation.NumericalDifferentiator
 import org.apache.spark.rdd.RDD
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

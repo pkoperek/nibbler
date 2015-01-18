@@ -1,11 +1,13 @@
 package nibbler
 
+import nibbler.api.DataSetJsonProtocol
+import nibbler.evaluation.DataSet
 import org.apache.spark.rdd.RDD
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 import spray.json._
-import nibbler.DataSetJsonProtocol._
+import DataSetJsonProtocol._
 
 class DataSetJsonProtocolTest extends FunSuite with MockitoSugar with ShouldMatchers {
 

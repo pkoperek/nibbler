@@ -1,6 +1,4 @@
-package nibbler
-
-import org.apache.spark.rdd.RDD
+package nibbler.io
 
 object HistdataInputParser extends Serializable {
 

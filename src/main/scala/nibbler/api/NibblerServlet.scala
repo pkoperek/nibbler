@@ -1,11 +1,10 @@
-package nibbler
+package nibbler.api
 
-import java.io.{FileNotFoundException, File}
-
+import nibbler.evaluation.{Function, FunctionBuilder, FunctionErrorEvaluator}
 import org.apache.spark.rdd.RDD
 import org.scalatra._
 import spray.json._
-import nibbler.DataSetJsonProtocol._
+import DataSetJsonProtocol._
 
 class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
 

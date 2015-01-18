@@ -1,6 +1,6 @@
-package nibbler
+package nibbler.evaluation
 
-private object BasicFunctions extends Serializable {
+object BasicFunctions extends Serializable {
 
   private val Variable = "var_(\\d+)".r
 

@@ -1,6 +1,8 @@
-package nibbler
+package nibbler.api
 
 import com.esotericsoftware.kryo.Kryo
+import nibbler.evaluation._
+import nibbler.io.{HistdataInputParser, HistdataTimestampParser}
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{SparkConf, SparkContext}
 

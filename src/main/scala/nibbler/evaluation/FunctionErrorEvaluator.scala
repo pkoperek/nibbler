@@ -3,18 +3,18 @@ package nibbler.evaluation
 import nibbler.evaluation
 import org.apache.spark.rdd.RDD
 
-class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
+class FunctionErrorEvaluator() extends Serializable {
 
   private val errorCalculationFunction = new ErrorCalculationFunction
   private val pairGenerator = new PairGenerator
 
-  def evaluate(input: RDD[Seq[Double]], functionDeserialized: evaluation.Function): Double = {
+  def evaluate(input: DataSet, functionDeserialized: evaluation.Function): Double = {
     val variablePairs = pairGenerator.generatePairs(2)
     var error = Double.MinValue
 
     for (pair <- variablePairs) {
-      val symbolicallyDifferentiated = symbolicDifferentiation(input, functionDeserialized, pair)
-      val numericallyDifferentiated = numericalDifferentiation(input, pair)
+      val symbolicallyDifferentiated = symbolicDifferentiation(input.getRawData, functionDeserialized, pair)
+      val numericallyDifferentiated = input.getNumericallyDifferentiated(pair)
 
       val pairingError = errorCalculationFunction.calculateError(symbolicallyDifferentiated, numericallyDifferentiated)
 
@@ -35,16 +35,6 @@ class FunctionErrorEvaluator(differentiatorType: String) extends Serializable {
 
   private def divide(row: (Long, (Double, Double))) = {
     (row._1, row._2._1 / row._2._2)
-  }
-
-  private def numericalDifferentiation(input: RDD[Seq[Double]], pair: (Int, Int)): RDD[(Long, Double)] = {
-    val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-    val numericallyDifferentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
-    numericallyDifferentiated
-  }
-
-  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
-    (row._1 + 1, row._2)
   }
 
   private def reverse(toReverse: (Double, Long)) = toReverse.swap

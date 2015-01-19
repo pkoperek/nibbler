@@ -14,7 +14,7 @@ class DataSetJsonProtocolTest extends FunSuite with MockitoSugar with ShouldMatc
   test("serializes data set to json without rdd") {
     // Given
     val rdd = mock[RDD[Seq[Double]]]
-    val dataSet = new DataSet(3, 14, rdd)
+    val dataSet = new DataSet(3, 14, rdd, Map())
 
     // When
     val dataSetAsJson: String = dataSet.toJson.toString()

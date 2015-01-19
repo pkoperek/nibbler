@@ -3,6 +3,7 @@ package nibbler.api
 import com.esotericsoftware.kryo.Kryo
 import nibbler.evaluation._
 import nibbler.io.{HistdataInputParser, HistdataTimestampParser}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -11,12 +12,17 @@ import scala.collection.mutable
 class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
+  private val pairGenerator = new PairGenerator
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
+    getDataSetOrRegister(dataSetPath, "backward")
+  }
+
+  def getDataSetOrRegister(dataSetPath: String, differentiatorType: String): DataSet = {
     val dataSet = getDataSet(dataSetPath)
 
     if (dataSet.isEmpty) {
-      registerDataSet(dataSetPath)
+      registerDataSet(dataSetPath, differentiatorType)
     } else {
       dataSet.get
     }
@@ -40,7 +46,38 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     initializedDataSets.get(dataSetPath)
   }
 
+  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
+    (row._1 + 1, row._2)
+  }
+
+  private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double)]] = {
+    val variablePairs = pairGenerator.generatePairs(2)
+
+    var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
+
+    for (pair <- variablePairs) {
+      val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
+      val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
+
+      val filename = "" + pair._1 + "_" + pair._2 + ".txt"
+      differentiated.map(row => row._1.toString + "," + row._2.toString).saveAsTextFile(filename)
+      val readAgain = sparkContext.textFile(filename).map(row => {
+        val splitted = row.split(",")
+        (splitted(0).toLong, splitted(0).toDouble)
+      }).cache()
+      inputDifferentiated = inputDifferentiated + (pair -> readAgain)
+    }
+
+    inputDifferentiated
+  }
+
+  private def reverse(toReverse: (Double, Long)) = toReverse.swap
+
   def registerDataSet(dataSetPath: String): DataSet = {
+    registerDataSet(dataSetPath, "backward")
+  }
+
+  def registerDataSet(dataSetPath: String, differentiatorType: String): DataSet = {
     initializedDataSets.synchronized {
       initializedDataSets.getOrElseUpdate(dataSetPath, {
         val rdd = sparkContext.textFile(dataSetPath)
@@ -52,7 +89,8 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
         new DataSet(
           rowsCount,
           columnsCount,
-          parsed.cache()
+          parsed,
+          numericallyDifferentiate(parsed, differentiatorType)
         )
       })
     }

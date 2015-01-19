@@ -1,6 +1,6 @@
 package nibbler.api
 
-import nibbler.evaluation.{Function, FunctionBuilder, FunctionErrorEvaluator}
+import nibbler.evaluation.{DataSet, Function, FunctionBuilder, FunctionErrorEvaluator}
 import org.apache.spark.rdd.RDD
 import org.scalatra._
 import org.scalatra.scalate.ScalateSupport
@@ -23,31 +23,31 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
   post("/register") {
     val requestAsJson = request.body.parseJson.asJsObject
     val inputFilePath = getValue(requestAsJson, "inputFile")
+    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
 
-    val dataSet = sparkContextService.registerDataSet(inputFilePath)
+    val dataSet = sparkContextService.registerDataSet(inputFilePath, differentiatorType)
     dataSet.toJson
   }
 
   post("/evaluate") {
     val requestAsJson = request.body.parseJson.asJsObject
+    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
 
     val inputFile = getValue(requestAsJson, "inputFile")
-    val input = parse(inputFile)
+    val input = parse(inputFile, differentiatorType)
 
     val function = getValue(requestAsJson, "function")
     val functionDeserializeed = parseFunction(function)
 
-    val differentiatorType = getValueOrDefault(requestAsJson, "numdiff", "backward")
-
-    new FunctionErrorEvaluator(differentiatorType).evaluate(input, functionDeserializeed)
+    new FunctionErrorEvaluator().evaluate(input, functionDeserializeed)
   }
 
   private def parseFunction(function: String): Function = {
     FunctionBuilder.buildFunction(function.parseJson.asJsObject)
   }
 
-  private def parse(inputFilePath: String): RDD[Seq[Double]] = {
-    sparkContextService.getDataSetOrRegister(inputFilePath).getRawData
+  private def parse(inputFilePath: String, differentiatorType: String): DataSet = {
+    sparkContextService.getDataSetOrRegister(inputFilePath, differentiatorType)
   }
 
   def getValueOrDefault(jsonObject: JsObject, key: String, default: String): String = {

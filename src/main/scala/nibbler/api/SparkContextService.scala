@@ -3,6 +3,8 @@ package nibbler.api
 import com.esotericsoftware.kryo.Kryo
 import nibbler.evaluation._
 import nibbler.io.{HistdataInputParser, HistdataTimestampParser}
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{Path, FileSystem}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{SparkConf, SparkContext}
@@ -13,6 +15,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
   private val pairGenerator = new PairGenerator
+  private val hdfs = FileSystem.get(new Configuration())
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     getDataSetOrRegister(dataSetPath, "backward")
@@ -56,10 +59,14 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
     for (pair <- variablePairs) {
+      hdfs.delete(new Path(filename(pair)), true)
+    }
+
+    for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
       val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
 
-      val filename = "" + pair._1 + "_" + pair._2 + ".txt"
+      val filename = filename(pair)
       differentiated.map(row => row._1.toString + "," + row._2.toString).saveAsTextFile(filename)
       val readAgain = sparkContext.textFile(filename).map(row => {
         val splitted = row.split(",")
@@ -69,6 +76,10 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     }
 
     inputDifferentiated
+  }
+
+  private def filename(pair: (Int, Int)): String = {
+    "" + pair._1 + "_" + pair._2 + ".txt"
   }
 
   private def reverse(toReverse: (Double, Long)) = toReverse.swap

@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     // scala! 
-    compile group: 'org.scala-lang', name: 'scala-library', version: '2.10'
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.10.4'
 
     // scalatra deps
     compile group: 'org.scalatra', name: 'scalatra_2.10', version: '2.2.2'
@@ -45,7 +45,7 @@ dependencies {
     providedCompile group: 'org.eclipse.jetty.orbit', name: 'javax.servlet', version: '3.0.0.v201112011016'
 
     // spark 
-    compile group: 'org.apache.spark', name: 'spark-core_2.10', version: '1.1.0'
+    compile group: 'org.apache.spark', name: 'spark-core_2.10', version: '1.2.0'
 
     // hadoop-client
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.4.0'

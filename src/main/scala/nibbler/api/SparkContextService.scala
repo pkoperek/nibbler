@@ -59,14 +59,14 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
     for (pair <- variablePairs) {
-      hdfs.delete(new Path(filename(pair)), true)
+      hdfs.delete(new Path(pairFilename(pair)), true)
     }
 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
       val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
 
-      val filename = filename(pair)
+      val filename = pairFilename(pair)
       differentiated.map(row => row._1.toString + "," + row._2.toString).saveAsTextFile(filename)
       val readAgain = sparkContext.textFile(filename).map(row => {
         val splitted = row.split(",")
@@ -78,7 +78,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     inputDifferentiated
   }
 
-  private def filename(pair: (Int, Int)): String = {
+  private def pairFilename(pair: (Int, Int)): String = {
     "" + pair._1 + "_" + pair._2 + ".txt"
   }
 

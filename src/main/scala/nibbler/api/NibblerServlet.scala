@@ -11,8 +11,7 @@ class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraS
 
   get("/") {
     contentType="text/html"
-
-    ssp("/index")
+    ssp("/WEB-INF/templates/index.ssp")
   }
 
   get("/status") {

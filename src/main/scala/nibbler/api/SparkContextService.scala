@@ -94,7 +94,7 @@ object SparkContextService {
       .set("spark.executor.memory", executorMemory)
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-      .set("spark.kryo.registrator", "nibbler.NibblerRegistrator")
+      .set("spark.kryo.registrator", "nibbler.api.NibblerRegistrator")
 
     val ctx = new SparkContext(conf)
     ctx.addJar(nibblerJarRealPath)

@@ -23,6 +23,7 @@
             var inputName = "#" + targetAction + "-input";
             var content = $(inputName).val();
 
+            $(inputName).removeClass("btn-success btn-danger");
             console.log("content: " + content);
 
             $.ajax({
@@ -31,9 +32,13 @@
                 contentType: 'application/json',
                 dataType: 'json',
                 data: content,
-                success: showOutput,
+                success: function(output) {
+                    $(inputName).addClass("btn-success")
+                    showOutput(output);
+                },
                 error: function(xhr, status, err) {
                     console.log("err " + err + " status: " + status);
+                    $(inputName).addClass("btn-danger")
                     showOutput("status: " + status + '\n' + "error: " + err + '\n' + "response: " + xhr.responseText);
                 }
             });

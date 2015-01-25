@@ -1,8 +1,13 @@
 nibbler
 =======
 
-Service for processing large datasets with use of Scala/Apache Spark
-Building requires Java 7! _(Scala 2.10.4 isn't able to work with Java 8!)_
+Service for processing large datasets with use of Scala/Apache Spark.
+
+Notes:
+======
+
+* Building requires Java 7! _(Scala 2.10.4 isn't able to work with Java 8!)_
+* After upgrading to `hadoop-client` 2.5.0 the ugly exception about missing `InputSplit...` class
 
 Available services:
 ===================
@@ -35,12 +40,12 @@ Parameters:
 
   * `--local` - runs spark in "local" mode (with master URI set to `local`)
 
-Useful scripts:
+Useful one-liners:
 ===============
 
-* One-liner for rebuilding and starting nibbler
+Rebuilds project and launches current dev version (`localhost:8080`)
 ```
-rm -rf nibbler && ./gradlew distZip && unzip build/distributions/nibbler.zip  && ./nibbler/bin/nibbler --local
+./gradlew clean jettyRun
 ```
 
 License

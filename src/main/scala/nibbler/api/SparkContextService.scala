@@ -15,7 +15,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
   private val pairGenerator = new PairGenerator
-  private val hdfs = FileSystem.get(new Configuration())
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     getDataSetOrRegister(dataSetPath, "backward")
@@ -49,22 +48,19 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     initializedDataSets.get(dataSetPath)
   }
 
-  private def incrementIdx(row: (Long, Double)): (Long, Double) = {
-    (row._1 + 1, row._2)
-  }
-
   private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double)]] = {
     val variablePairs = pairGenerator.generatePairs(2)
 
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
+    val hdfs = FileSystem.get(new Configuration())
     for (pair <- variablePairs) {
       hdfs.delete(new Path(pairFilename(pair)), true)
     }
 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-      val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(reverse).map(incrementIdx)
+      val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(_.swap).map(row => (row._1 + 1, row._2))
 
       val filename = pairFilename(pair)
       differentiated.map(row => row._1.toString + "," + row._2.toString).saveAsTextFile(filename)
@@ -81,8 +77,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
   private def pairFilename(pair: (Int, Int)): String = {
     "" + pair._1 + "_" + pair._2 + ".txt"
   }
-
-  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
   def registerDataSet(dataSetPath: String): DataSet = {
     registerDataSet(dataSetPath, "backward")

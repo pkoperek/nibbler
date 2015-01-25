@@ -21,9 +21,10 @@
             var targetAction = e.srcElement.getAttribute("action");
             var targetUrl = targetAction;
             var inputName = "#" + targetAction + "-input";
+            var buttonName = "#" + targetAction + "-button";
             var content = $(inputName).val();
 
-            $(inputName).removeClass("btn-success btn-danger");
+            $(buttonName).removeClass("btn-success btn-danger");
             console.log("content: " + content);
 
             $.ajax({
@@ -33,12 +34,12 @@
                 dataType: 'json',
                 data: content,
                 success: function(output) {
-                    $(inputName).addClass("btn-success")
+                    $(buttonName).addClass("btn-success")
                     showOutput(output);
                 },
                 error: function(xhr, status, err) {
                     console.log("err " + err + " status: " + status);
-                    $(inputName).addClass("btn-danger")
+                    $(buttonName).addClass("btn-danger")
                     showOutput("status: " + status + '\n' + "error: " + err + '\n' + "response: " + xhr.responseText);
                 }
             });
@@ -73,7 +74,7 @@
             }
                     </textarea>
                 </div>
-                <button type="submit" class="btn btn-default">Submit</button>
+                <button type="submit" id="register-button" class="btn btn-default">Submit</button>
             </form>
             <form action="evaluate" method="POST" onsubmit="submitJson(event)">
                 <div class="form-group">
@@ -92,7 +93,7 @@
                     </textarea>
                 </div>
 
-                <button type="submit" class="btn btn-default">Submit</button>
+                <button type="submit" id="evaluate-button" class="btn btn-default">Submit</button>
             </form>
         </div>
 

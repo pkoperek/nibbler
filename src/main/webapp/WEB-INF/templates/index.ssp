@@ -57,6 +57,9 @@
                     <li><%= dataSet %></li>
                 <% } %>
             </ul>
+            <% if (dataSets.isEmpty) { %>
+                <div>No registered datasets!</div>
+            <% } %>
         </div>
         <hr>
         <div id="forms">

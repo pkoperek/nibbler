@@ -70,7 +70,7 @@
                     <textarea class="form-control" rows="10" id="register-input" form="register">
             {
                 "numdiff": "backward",
-                "inputFile": "/tmp/input.csv"
+                "inputFile": "/tmp/ds_1m.txt"
             }
                     </textarea>
                 </div>
@@ -82,7 +82,7 @@
                     <textarea class="form-control" rows="10" id="evaluate-input" form="evaluate">
             {
                 "numdiff": "backward",
-                "inputFile": "/tmp/input.csv",
+                "inputFile": "/tmp/ds_1m.txt",
                 "function": {
                     "function": "sin",
                     "operands": [{

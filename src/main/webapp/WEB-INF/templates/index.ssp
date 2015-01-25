@@ -49,6 +49,16 @@
 <body>
     <div class="container">
         <h1>nibbler web ui</h1>
+        <div id="registered-data-sets">
+            <label for="">Registered data sets</label>
+            <ul>
+                <%@ val dataSets: List[String] %>
+                <% for (dataSet <- dataSets) { %>
+                    <li><%= dataSet %></li>
+                <% } %>
+            </ul>
+        </div>
+        <hr>
         <div id="forms">
             <form action="register" method="POST" onsubmit="submitJson(event)">
                 <div class="form-group">
@@ -80,7 +90,7 @@
         </div>
 
         <hr>
-    
+
         <div id="output-container" class="row">
             <label for="output">Output</label>
             <textarea class="form-control" id="output" rows="20">

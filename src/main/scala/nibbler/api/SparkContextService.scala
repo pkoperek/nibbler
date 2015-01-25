@@ -22,6 +22,10 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     }
   }
 
+  def getRegisteredDataSets(): List[String] = {
+    initializedDataSets.keySet.toList
+  }
+  
   def getSparkContext: SparkContext = sparkContext
 
   def containsDataSet(dataSetPath: String): Boolean = {

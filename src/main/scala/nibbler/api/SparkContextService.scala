@@ -22,6 +22,10 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
     }
   }
 
+  def getRegisteredDataSets(): List[String] = {
+    initializedDataSets.keySet.toList
+  }
+
   def getSparkContext: SparkContext = sparkContext
 
   def containsDataSet(dataSetPath: String): Boolean = {
@@ -43,7 +47,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
         val rowsCount = rdd.count()
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
-        val parsed = rdd.map(HistdataInputParser.parseLine)
+        val parsed = rdd.filter(row => !row.startsWith("#")).map(HistdataInputParser.parseLine)
 
         new DataSet(
           rowsCount,
@@ -94,7 +98,7 @@ object SparkContextService {
       .set("spark.executor.memory", executorMemory)
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-      .set("spark.kryo.registrator", "nibbler.NibblerRegistrator")
+      .set("spark.kryo.registrator", "nibbler.api.NibblerRegistrator")
 
     val ctx = new SparkContext(conf)
     ctx.addJar(nibblerJarRealPath)

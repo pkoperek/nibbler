@@ -3,10 +3,16 @@ package nibbler.api
 import nibbler.evaluation.{Function, FunctionBuilder, FunctionErrorEvaluator}
 import org.apache.spark.rdd.RDD
 import org.scalatra._
+import org.scalatra.scalate.ScalateSupport
 import spray.json._
 import DataSetJsonProtocol._
 
-class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet {
+class NibblerServlet(sparkContextService: SparkContextService) extends ScalatraServlet with ScalateSupport {
+
+  get("/") {
+    contentType="text/html"
+    ssp("/WEB-INF/templates/index.ssp", "dataSets" -> sparkContextService.getRegisteredDataSets())
+  }
 
   get("/status") {
     val filteredValues: Array[Int] = sparkContextService.getSparkContext.parallelize(1 to 10000).filter(_ < 10).collect()

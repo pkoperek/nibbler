@@ -17,11 +17,8 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
   private val pairGenerator = new PairGenerator
-  private val masterUri = sparkContext.getConf.get("spark.master")
   private val tmpDirectory = sparkContext.getConf.get("nibbler.hdfs.tmp.dir")
   private val hadoopConfigDirectory = sparkContext.getConf.get("hadoop.conf.dir")
-
-  logInfo(">>> SparkContext init: " + masterUri + " " + tmpDirectory)
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     getDataSetOrRegister(dataSetPath, "backward")
@@ -89,7 +86,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
       return fileName
     }
 
-    return "hdfs://" + masterUri + "/" + tmpDirectory + "/" + fileName
+    return fileSystem.getUri.toString + "/" + tmpDirectory + "/" + fileName
   }
 
   def registerDataSet(dataSetPath: String): DataSet = {

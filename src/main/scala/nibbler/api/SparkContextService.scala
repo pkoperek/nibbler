@@ -1,20 +1,26 @@
 package nibbler.api
 
+import java.util
+
 import com.esotericsoftware.kryo.Kryo
 import nibbler.evaluation._
 import nibbler.io.{HistdataInputParser, HistdataTimestampParser}
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{Path, FileSystem}
+import org.apache.hadoop.fs.{LocalFileSystem, Path, FileSystem}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{Logging, SparkConf, SparkContext}
 
 import scala.collection.mutable
 
-class SparkContextService(sparkContext: SparkContext) extends Serializable {
+class SparkContextService(sparkContext: SparkContext) extends Serializable with Logging {
 
   private val initializedDataSets = mutable.Map[String, DataSet]()
   private val pairGenerator = new PairGenerator
+  private val masterUri = sparkContext.getConf.get("spark.master")
+  private val tmpDirectory = sparkContext.getConf.get("nibbler.hdfs.tmp.dir")
+
+  logInfo(">>> SparkContext init: " + masterUri + " " + tmpDirectory)
 
   def getDataSetOrRegister(dataSetPath: String): DataSet = {
     getDataSetOrRegister(dataSetPath, "backward")
@@ -53,29 +59,34 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable {
 
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
-    val hdfs = FileSystem.get(new Configuration())
+    val fileSystem = FileSystem.get(new Configuration())
     for (pair <- variablePairs) {
-      hdfs.delete(new Path(pairFilename(pair)), true)
+      fileSystem.delete(new Path(pairFilename(fileSystem, pair)), true)
     }
 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
       val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(_.swap).map(row => (row._1 + 1, row._2))
 
-      val filename = pairFilename(pair)
-      differentiated.map(row => row._1.toString + "," + row._2.toString).saveAsTextFile(filename)
-      val readAgain = sparkContext.textFile(filename).map(row => {
-        val splitted = row.split(",")
-        (splitted(0).toLong, splitted(0).toDouble)
-      }).cache()
+      val filename = pairFilename(fileSystem, pair)
+      differentiated.saveAsObjectFile(filename)
+      val readAgain = sparkContext.objectFile[(Long, Double)](filename).cache()
+
       inputDifferentiated = inputDifferentiated + (pair -> readAgain)
     }
 
     inputDifferentiated
   }
 
-  private def pairFilename(pair: (Int, Int)): String = {
-    "" + pair._1 + "_" + pair._2 + ".txt"
+  private def pairFilename(fileSystem: FileSystem, pair: (Int, Int)): String = {
+    val fileName = "" + pair._1 + "_" + pair._2 + ".txt";
+
+    if (fileSystem.isInstanceOf[LocalFileSystem])
+    {
+      return fileName
+    }
+
+    return "hdfs://" + masterUri + "/" + tmpDirectory + "/" + fileName
   }
 
   def registerDataSet(dataSetPath: String): DataSet = {
@@ -138,10 +149,12 @@ object SparkContextService {
       .setAppName(appName)
       .set("spark.executor.uri", executorUri)
       .setMaster(masterUri)
+      .set("spark.executor.extraClassPath", "/etc/hadoop/conf")
       .set("spark.executor.memory", executorMemory)
       .setSparkHome("someHomeWhichShouldBeIrrelevant")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "nibbler.api.NibblerRegistrator")
+      .set("nibbler.hdfs.tmp.dir", "/tmp")
 
     val ctx = new SparkContext(conf)
     ctx.addJar(nibblerJarRealPath)

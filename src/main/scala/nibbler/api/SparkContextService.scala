@@ -19,6 +19,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
   private val pairGenerator = new PairGenerator
   private val masterUri = sparkContext.getConf.get("spark.master")
   private val tmpDirectory = sparkContext.getConf.get("nibbler.hdfs.tmp.dir")
+  private val hadoopConfigDirectory = sparkContext.getConf.get("hadoop.conf.dir")
 
   logInfo(">>> SparkContext init: " + masterUri + " " + tmpDirectory)
 
@@ -59,7 +60,10 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
 
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
-    val fileSystem = FileSystem.get(new Configuration())
+    val configuration: Configuration = new Configuration()
+    configuration.addResource(new Path(hadoopConfigDirectory, "core-site.xml"))
+    configuration.addResource(new Path(hadoopConfigDirectory, "hdfs-site.xml"))
+    val fileSystem = FileSystem.get(configuration)
     for (pair <- variablePairs) {
       fileSystem.delete(new Path(pairFilename(fileSystem, pair)), true)
     }
@@ -81,8 +85,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
   private def pairFilename(fileSystem: FileSystem, pair: (Int, Int)): String = {
     val fileName = "" + pair._1 + "_" + pair._2 + ".txt";
 
-    if (fileSystem.isInstanceOf[LocalFileSystem])
-    {
+    if (fileSystem.isInstanceOf[LocalFileSystem]) {
       return fileName
     }
 
@@ -155,6 +158,7 @@ object SparkContextService {
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "nibbler.api.NibblerRegistrator")
       .set("nibbler.hdfs.tmp.dir", "/tmp")
+      .set("hadoop.conf.dir", "/etc/hadoop/conf")
 
     val ctx = new SparkContext(conf)
     ctx.addJar(nibblerJarRealPath)

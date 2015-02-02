@@ -33,10 +33,6 @@ class FunctionErrorEvaluator() extends Serializable {
     input.map(x => df_dy.evaluate(x) / df_dx.evaluate(x)).zipWithIndex().map(reverse)
   }
 
-  private def divide(row: (Long, (Double, Double))) = {
-    (row._1, row._2._1 / row._2._2)
-  }
-
   private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
 }

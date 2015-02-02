@@ -141,7 +141,6 @@ class NibblerRegistrator extends KryoRegistrator {
     kryo.register(classOf[HistdataTimestampParser])
     kryo.register(classOf[NumericalDifferentiator])
     kryo.register(classOf[PairGenerator])
-    kryo.register(classOf[scala.Tuple2])
     kryo.register(BasicFunctions.getClass)
     kryo.register(HistdataInputParser.getClass)
   }

@@ -52,26 +52,35 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     initializedDataSets.get(dataSetPath)
   }
 
+  private def serialize[RDDType](path: String, input: RDD[RDDType]): RDD[RDDType] = {
+    input.saveAsObjectFile(path)
+    sparkContext.objectFile[RDDType](path).cache()
+  }
+
+  private def deleteFile(path: String) = {
+    val configuration: Configuration = new Configuration()
+    configuration.addResource(new Path(hadoopConfigDirectory, "core-site.xml"))
+    configuration.addResource(new Path(hadoopConfigDirectory, "hdfs-site.xml"))
+    val fileSystem = FileSystem.get(configuration)
+
+    fileSystem.delete(new Path(tmpDirectoryPrefix(), path), true)
+  }
+
   private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double)]] = {
     val variablePairs = pairGenerator.generatePairs(2)
 
     var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
 
-    val configuration: Configuration = new Configuration()
-    configuration.addResource(new Path(hadoopConfigDirectory, "core-site.xml"))
-    configuration.addResource(new Path(hadoopConfigDirectory, "hdfs-site.xml"))
-    val fileSystem = FileSystem.get(configuration)
     for (pair <- variablePairs) {
-      fileSystem.delete(new Path(pairFilename(fileSystem, pair)), true)
+      deleteFile(input.name + pairSuffix(pair))
     }
 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
       val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(_.swap).map(row => (row._1 + 1, row._2))
 
-      val filename = pairFilename(fileSystem, pair)
-      differentiated.saveAsObjectFile(filename)
-      val readAgain = sparkContext.objectFile[(Long, Double)](filename).cache()
+      val filename = tmpDirectoryPrefix() + "/" + input.name + pairSuffix(pair)
+      val readAgain = serialize(filename, differentiated)
 
       inputDifferentiated = inputDifferentiated + (pair -> readAgain)
     }
@@ -79,14 +88,21 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     inputDifferentiated
   }
 
-  private def pairFilename(fileSystem: FileSystem, pair: (Int, Int)): String = {
-    val fileName = "" + pair._1 + "_" + pair._2 + ".txt";
+  private def tmpDirectoryPrefix(): String = {
+    val configuration: Configuration = new Configuration()
+    configuration.addResource(new Path(hadoopConfigDirectory, "core-site.xml"))
+    configuration.addResource(new Path(hadoopConfigDirectory, "hdfs-site.xml"))
+    val fileSystem = FileSystem.get(configuration)
 
     if (fileSystem.isInstanceOf[LocalFileSystem]) {
-      return fileName
+      return "/tmp"
     }
 
-    return fileSystem.getUri.toString + "/" + tmpDirectory + "/" + fileName
+    fileSystem.getUri.toString + "/" + tmpDirectory
+  }
+
+  private def pairSuffix(pair: (Int, Int)): String = {
+    "_" + pair._1 + "_" + pair._2 + ".txt"
   }
 
   def registerDataSet(dataSetPath: String): DataSet = {
@@ -101,11 +117,12 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
         val rowsCount = rdd.count()
         val columnsCount = if (rowsCount > 0) rdd.first().split(",").length else 0
         val parsed = rdd.filter(row => !row.startsWith("#")).map(HistdataInputParser.parseLine)
+        parsed.setName(new Path(dataSetPath).getName)
 
         new DataSet(
           rowsCount,
           columnsCount,
-          parsed,
+          serialize(tmpDirectoryPrefix() + "/" + parsed.name, parsed),
           numericallyDifferentiate(parsed, differentiatorType)
         )
       })

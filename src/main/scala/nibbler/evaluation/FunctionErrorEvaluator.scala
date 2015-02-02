@@ -16,7 +16,8 @@ class FunctionErrorEvaluator() extends Serializable {
       val symbolicallyDifferentiated = symbolicDifferentiation(input.getRawData, functionDeserialized, pair)
       val numericallyDifferentiated = input.getNumericallyDifferentiated(pair)
 
-      val pairingError = errorCalculationFunction.calculateError(symbolicallyDifferentiated, numericallyDifferentiated)
+      val errorAggregated = errorCalculationFunction.calculateError(symbolicallyDifferentiated, numericallyDifferentiated)
+      val pairingError = errorAggregated / input.getNumberOfRows
 
       if (error < pairingError) {
         error = pairingError

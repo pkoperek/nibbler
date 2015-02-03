@@ -76,7 +76,7 @@ class NibblerRegistrator extends KryoRegistrator {
 }
 
 object SparkContextService {
-  private val executorUri = "http://d3kbcqa49mib13.cloudfront.net/spark-1.1.0-bin-hadoop2.4.tgz"
+  private val executorUri = "http://d3kbcqa49mib13.cloudfront.net/spark-1.1.1-bin-hadoop2.4.tgz"
   private val defaultMasterUri = "mesos://zk://master:2181/mesos"
   private val defaultExecutorMemory = "512m"
 

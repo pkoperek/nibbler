@@ -12,6 +12,7 @@ import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{Logging, SparkConf, SparkContext}
 
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 class SparkContextService(sparkContext: SparkContext) extends Serializable with Logging {
 
@@ -52,7 +53,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     initializedDataSets.get(dataSetPath)
   }
 
-  private def serialize[RDDType](path: String, input: RDD[RDDType]): RDD[RDDType] = {
+  private def serialize[RDDType: ClassTag](path: String, input: RDD[RDDType]): RDD[RDDType] = {
     input.saveAsObjectFile(path)
     sparkContext.objectFile[RDDType](path).cache()
   }

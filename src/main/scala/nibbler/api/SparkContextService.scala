@@ -1,7 +1,6 @@
 package nibbler.api
 
-import java.util
-
+import org.apache.spark.SparkContext._
 import com.esotericsoftware.kryo.Kryo
 import nibbler.evaluation._
 import nibbler.io.{HistdataInputParser, HistdataTimestampParser}
@@ -9,7 +8,8 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{LocalFileSystem, Path, FileSystem}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
-import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.apache.spark.{RangePartitioner, Logging, SparkConf, SparkContext}
+
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
@@ -82,6 +82,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
 
       val filename = tmpDirectoryPrefix() + "/" + input.name + pairSuffix(pair)
       val readAgain = serialize(filename, differentiated)
+      readAgain.partitionBy(new RangePartitioner[Long, Double](16, readAgain))
 
       inputDifferentiated = inputDifferentiated + (pair -> readAgain)
     }

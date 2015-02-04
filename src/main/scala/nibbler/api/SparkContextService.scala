@@ -67,15 +67,16 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     fileSystem.delete(new Path(tmpDirectoryPrefix(), path), true)
   }
 
-  private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double)]] = {
+  private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double, Double)]] = {
     val variablePairs = pairGenerator.generatePairs(2)
 
-    var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double)]]()
+    var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double, Double)]]()
 
     for (pair <- variablePairs) {
       deleteFile(input.name + pairSuffix(pair))
     }
 
+    // TODO: add join here 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
       val differentiated = differentiator.partialDerivative(input).zipWithIndex().map(_.swap).map(row => (row._1 + 1, row._2))
@@ -124,7 +125,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
         new DataSet(
           rowsCount,
           columnsCount,
-          serialize(tmpDirectoryPrefix() + "/" + parsed.name, parsed),
           numericallyDifferentiate(parsed, differentiatorType)
         )
       })

@@ -13,10 +13,10 @@ class FunctionErrorEvaluator() extends Serializable {
     var error = Double.MinValue
 
     for (pair <- variablePairs) {
-      val symbolicallyDifferentiated = symbolicDifferentiation(input.getRawData, functionDeserialized, pair)
-      val numericallyDifferentiated = input.getNumericallyDifferentiated(pair)
+      val data = input.getRawWithNumericallyDifferentiated(pair)
+      val symbolicallyDifferentiated = symbolicDifferentiation(data, functionDeserialized, pair)
 
-      val errorAggregated = errorCalculationFunction.calculateError(symbolicallyDifferentiated, numericallyDifferentiated)
+      val errorAggregated = errorCalculationFunction.calculateError(symbolicallyDifferentiated)
       val pairingError = errorAggregated / input.getNumberOfRows
 
       if (error < pairingError) {
@@ -27,13 +27,19 @@ class FunctionErrorEvaluator() extends Serializable {
     error
   }
 
-  private def symbolicDifferentiation(input: RDD[Seq[Double]], function: evaluation.Function, pair: (Int, Int)): RDD[(Long, Double)] = {
+  private def symbolicDifferentiation(input: RDD[(Long, (Seq[Double], Double))], function: evaluation.Function, pair: (Int, Int)): RDD[(Long, (Double, Double))] = {
     val df_dx = function.differentiate("var_" + pair._1)
     val df_dy = function.differentiate("var_" + pair._2)
 
-    input.map(x => df_dy.evaluate(x) / df_dx.evaluate(x)).zipWithIndex().map(reverse)
+    input.map(x =>
+      (x._1,
+        (
+          df_dy.evaluate(x._2._1) / df_dx.evaluate(x._2._1)
+          ,
+          x._2._2
+          )
+        )
+    )
   }
-
-  private def reverse(toReverse: (Double, Long)) = toReverse.swap
 
 }

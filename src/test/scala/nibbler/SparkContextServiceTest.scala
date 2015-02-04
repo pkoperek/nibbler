@@ -74,21 +74,21 @@ class SparkContextServiceTest
     registeredDataSet should not equal null
   }
 
-  test("get or else register data set") {
-    // Given
-    val cachedRdd = mock[RDD[Seq[Double]]]
-    val parsedRdd = mock[RDD[Seq[Double]]](returnRddForCache(cachedRdd))
-    val rdd = mock[RDD[String]](returnRddForMap(parsedRdd))
-    val dataSetPath = "someDataSetPath"
-    when(sparkContext.textFile(anyString, anyInt)).thenReturn(rdd)
-
-    // When
-    val dataSet = service.getDataSetOrRegister(dataSetPath)
-
-    // Then
-    dataSet.getRawData should not equal rdd
-    dataSet.getRawData should equal(cachedRdd)
-  }
+//  test("get or else register data set") {
+//    // Given
+//    val cachedRdd = mock[RDD[Seq[Double]]]
+//    val parsedRdd = mock[RDD[Seq[Double]]](returnRddForCache(cachedRdd))
+//    val rdd = mock[RDD[String]](returnRddForMap(parsedRdd))
+//    val dataSetPath = "someDataSetPath"
+//    when(sparkContext.textFile(anyString, anyInt)).thenReturn(rdd)
+//
+//    // When
+//    val dataSet = service.getDataSetOrRegister(dataSetPath)
+//
+//    // Then
+//    dataSet.getRawData should not equal rdd
+//    dataSet.getRawData should equal(cachedRdd)
+//  }
 
   test("registered data set is reported as contained") {
     // Given

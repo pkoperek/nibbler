@@ -67,26 +67,25 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     fileSystem.delete(new Path(tmpDirectoryPrefix(), path), true)
   }
 
-  private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, Double, Double)]] = {
+  private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Long, (Seq[Double], Double))]] = {
     val variablePairs = pairGenerator.generatePairs(2)
 
-    var inputDifferentiated = Map[(Int, Int), RDD[(Long, Double, Double)]]()
+    var inputDifferentiated = Map[(Int, Int), RDD[(Long, (Seq[Double], Double))]]()
 
     for (pair <- variablePairs) {
       deleteFile(input.name + pairSuffix(pair))
     }
 
     val inputWithIndex = input.zipWithIndex().map(reverse)
-    inputWithIndex.setName(input.name + "WithIndex")
+    inputWithIndex.setName(input.name + "-withIndex")
 
-    // TODO: add join here 
     for (pair <- variablePairs) {
       val differentiator = NumericalDifferentiator(differentiatorType, pair._1, pair._2)
-      val differentiated = differentiator.partialDerivative(inputWithIndex).zipWithIndex().map(_.swap).map(row => (row._1 + 1, row._2))
+      val inputAndDifferentiated = differentiator.partialDerivative(inputWithIndex)
 
       val filename = tmpDirectoryPrefix() + "/" + inputWithIndex.name + pairSuffix(pair)
-      val readAgain = serialize(filename, differentiated)
-      readAgain.partitionBy(new RangePartitioner[Long, Double](16, readAgain))
+      val readAgain = serialize(filename, inputAndDifferentiated)
+      readAgain.partitionBy(new RangePartitioner[Long, (Seq[Double], Double)](16, readAgain))
 
       inputDifferentiated = inputDifferentiated + (pair -> readAgain)
     }

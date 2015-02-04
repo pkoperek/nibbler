@@ -76,7 +76,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
       deleteFile(input.name + pairSuffix(pair))
     }
 
-    val inputWithIndex = input.zipWithIndex().map(reverse)
+    val inputWithIndex = input.zipWithIndex().map(_.swap)
     inputWithIndex.setName(input.name + "-withIndex")
 
     for (pair <- variablePairs) {
@@ -91,10 +91,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
     }
 
     inputDifferentiated
-  }
-
-  private def reverse(input: (Seq[Double], Long)): (Long, Seq[Double]) = {
-    input.swap
   }
 
   private def tmpDirectoryPrefix(): String = {

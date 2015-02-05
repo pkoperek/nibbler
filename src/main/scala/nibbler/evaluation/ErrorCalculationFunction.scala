@@ -13,10 +13,9 @@ class ErrorCalculationFunction extends Serializable {
     left + right
   }
 
-  def calculateError(symbolicallyDifferentiated: RDD[(Long, (Double, Double))]): Double = {
+  def calculateError(symbolicallyDifferentiated: RDD[(Double, Double)]): Double = {
     val sumOfRowErrors = symbolicallyDifferentiated
-      .mapValues(computeError)
-      .map(t => t._2)
+      .map(computeError)
       .reduce(add)
 
     -sumOfRowErrors

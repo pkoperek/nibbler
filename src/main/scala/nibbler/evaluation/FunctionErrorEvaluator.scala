@@ -27,18 +27,12 @@ class FunctionErrorEvaluator() extends Serializable {
     error
   }
 
-  private def symbolicDifferentiation(input: RDD[(Long, (Seq[Double], Double))], function: evaluation.Function, pair: (Int, Int)): RDD[(Long, (Double, Double))] = {
+  private def symbolicDifferentiation(input: RDD[(Seq[Double], Double)], function: evaluation.Function, pair: (Int, Int)): RDD[(Double, Double)] = {
     val df_dx = function.differentiate("var_" + pair._1)
     val df_dy = function.differentiate("var_" + pair._2)
 
     input.map(x =>
-      (x._1,
-        (
-          df_dy.evaluate(x._2._1) / df_dx.evaluate(x._2._1)
-          ,
-          x._2._2
-          )
-        )
+      (df_dy.evaluate(x._1) / df_dx.evaluate(x._1), x._2)
     )
   }
 

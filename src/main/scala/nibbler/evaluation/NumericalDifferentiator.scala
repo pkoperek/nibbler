@@ -4,7 +4,7 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 trait NumericalDifferentiator extends Serializable {
-  def partialDerivative(input: RDD[(Long, Seq[Double])]): RDD[(Long, (Seq[Double], Double))] = {
+  def partialDerivative(input: RDD[(Long, Seq[Double])]): RDD[(Seq[Double], Double)] = {
     if (!validateInput(input)) {
       throw new IllegalArgumentException("Dataset doesn't contain at least two values in sequence!")
     }
@@ -12,7 +12,7 @@ trait NumericalDifferentiator extends Serializable {
     partialDerivativeInternal(input)
   }
 
-  def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Long, (Seq[Double], Double))]
+  def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Seq[Double], Double)]
 
   def validateInput(input: RDD[(Long, Seq[Double])]): Boolean = {
     val firstSequence = input.first()._2
@@ -37,7 +37,7 @@ object NumericalDifferentiator extends Serializable {
    * x_n - x_n-1
    */
   private class BackwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
-    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Long, (Seq[Double], Double))] = {
+    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Seq[Double], Double)] = {
       val minuend: RDD[(Long, Seq[Double])] = input
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(index_plus_1)
 
@@ -50,7 +50,7 @@ object NumericalDifferentiator extends Serializable {
 
       val differentiated = (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
 
-      (row._1, (minuendRow, differentiated))
+      (minuendRow, differentiated)
     }
 
     private def index_plus_1(row: (Long, Seq[Double])) = {
@@ -62,7 +62,7 @@ object NumericalDifferentiator extends Serializable {
    * x_n - x_n+1
    */
   private class ForwardNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
-    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Long, (Seq[Double], Double))] = {
+    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Seq[Double], Double)] = {
       val minuend: RDD[(Long, Seq[Double])] = input
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(index_minus_1)
 
@@ -75,7 +75,7 @@ object NumericalDifferentiator extends Serializable {
 
       val differentiated = (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
 
-      (row._1, (minuendRow, differentiated))
+      (minuendRow, differentiated)
     }
 
     private def index_minus_1(row: (Long, Seq[Double])) = {
@@ -87,7 +87,7 @@ object NumericalDifferentiator extends Serializable {
    * x_n - x_n-2
    */
   private class CentralNumericalDifferentiator(differentialQuotientDividend: Int, differentialQuotientDivisor: Int) extends NumericalDifferentiator {
-    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Long, (Seq[Double], Double))] = {
+    override def partialDerivativeInternal(input: RDD[(Long, Seq[Double])]): RDD[(Seq[Double], Double)] = {
       val minuend: RDD[(Long, Seq[Double])] = input
       val subtrahend: RDD[(Long, Seq[Double])] = minuend.map(index_plus_2)
 
@@ -100,7 +100,7 @@ object NumericalDifferentiator extends Serializable {
 
       val differentiated = (minuendRow(differentialQuotientDividend) - subtrahendRow(differentialQuotientDividend)) / (minuendRow(differentialQuotientDivisor) - subtrahendRow(differentialQuotientDivisor))
 
-      (row._1, (minuendRow, differentiated))
+      (minuendRow, differentiated)
     }
 
     private def index_plus_2(row: (Long, Seq[Double])) = {

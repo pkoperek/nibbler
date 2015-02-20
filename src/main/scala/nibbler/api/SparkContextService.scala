@@ -176,6 +176,8 @@ object SparkContextService {
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "nibbler.api.NibblerRegistrator")
       .set("nibbler.hdfs.tmp.dir", "/tmp")
+      .set("spark.mesos.coarse", "true")
+      .set("spark.mesos.executor.memoryOverhead", "100")
       .set("hadoop.conf.dir", "/etc/hadoop/conf")
 
     val ctx = new SparkContext(conf)

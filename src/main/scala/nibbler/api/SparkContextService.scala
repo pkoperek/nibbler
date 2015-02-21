@@ -8,7 +8,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{LocalFileSystem, Path, FileSystem}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
-import org.apache.spark.{RangePartitioner, Logging, SparkConf, SparkContext}
+import org.apache.spark._
 
 
 import scala.collection.mutable
@@ -70,7 +70,7 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
   private def numericallyDifferentiate(input: RDD[Seq[Double]], differentiatorType: String): Map[(Int, Int), RDD[(Seq[Double], Double)]] = {
     val variablePairs = pairGenerator.generatePairs(2)
 
-    var inputDifferentiated = Map[(Int, Int), RDD[(Long, (Seq[Double], Double))]]()
+    var inputDifferentiated = Map[(Int, Int), RDD[(Seq[Double], Double)]]()
 
     for (pair <- variablePairs) {
       deleteFile(input.name + pairSuffix(pair))
@@ -85,7 +85,6 @@ class SparkContextService(sparkContext: SparkContext) extends Serializable with 
 
       val filename = tmpDirectoryPrefix() + "/" + inputWithIndex.name + pairSuffix(pair)
       val readAgain = serialize(filename, inputAndDifferentiated)
-      readAgain.partitionBy(new RangePartitioner[Seq[Double], Double](16, readAgain))
 
       inputDifferentiated = inputDifferentiated + (pair -> readAgain)
     }

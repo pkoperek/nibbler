@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.{LocalFileSystem, Path, FileSystem}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.spark.{RangePartitioner, Logging, SparkConf, SparkContext}
+import org.joda.time.format.DateTimeFormat
 
 
 import scala.collection.mutable
@@ -147,6 +148,7 @@ class NibblerRegistrator extends KryoRegistrator {
     kryo.register(classOf[PairGenerator])
     kryo.register(BasicFunctions.getClass)
     kryo.register(HistdataInputParser.getClass)
+    kryo.register(classOf[DateTimeFormat])
   }
 }
 

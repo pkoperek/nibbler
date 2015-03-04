@@ -3,13 +3,14 @@ package nibbler.io
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
+import org.joda.time.format.DateTimeFormat
+
 class HistdataTimestampParser extends Serializable {
 
-  val dateFormat = new SimpleDateFormat("yyyyMMdd HHmmssSSS", Locale.US)
+  val dateFormat = DateTimeFormat.forPattern("yyyyMMdd HHmmssSSS")
 
   def parse(timestamp: String): Long = {
-    val parsedTimestamp: Date = dateFormat.parse(timestamp)
-    parsedTimestamp.getTime
+    dateFormat.parseMillis(timestamp)
   }
 
 }

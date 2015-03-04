@@ -160,11 +160,11 @@ object SparkContextService {
   val nibblerMasterUriKey: String = "nibbler.master.uri"
   val sparkExecutorMemory: String = "spark.executor.memory"
 
-  def apply(nibblerJarRealPath: String, appName: String): SparkContextService = {
-    new SparkContextService(createSparkContext(nibblerJarRealPath, appName))
+  def apply(jarPaths: Array[String], appName: String): SparkContextService = {
+    new SparkContextService(createSparkContext(jarPaths, appName))
   }
 
-  private def createSparkContext(nibblerJarRealPath: String, appName: String): SparkContext = {
+  private def createSparkContext(jarPaths: Array[String], appName: String): SparkContext = {
     val masterUri = System.getProperty(nibblerMasterUriKey, defaultMasterUri)
     val executorMemory = System.getProperty(sparkExecutorMemory, defaultExecutorMemory)
 
@@ -183,7 +183,9 @@ object SparkContextService {
       .set("hadoop.conf.dir", "/etc/hadoop/conf")
 
     val ctx = new SparkContext(conf)
-    ctx.addJar(nibblerJarRealPath)
+    for (jarPath <- jarPaths) {
+      ctx.addJar(jarPath)
+    }
     ctx
   }
 }
